@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta http-equiv="Content-Security-Policy" content="
+            default-src 'self';
+            script-src 'self';
+            style-src 'self' 'unsafe-inline';
+            img-src 'self' data:;
+        ">
+    
+    <link rel="stylesheet" href="../node_modules/toastify-js/src/toastify.css">
+
+    <link rel="stylesheet" href="../node_modules/material-icons/iconfont/material-icons.css">
+
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="./css/index.css">
+
+    <title>Production Office</title>
+    
+</head>
+<body>
+    <div class="container-fluid p-5 pt-4 mt-1">
+        <div class="d-flex justify-content-between">
+            <div class="d-flex">
+                <div style="padding-top: 3px; cursor: pointer;">
+                    <i class="icon-btn icon material-icons"
+                        id="backBtn">chevron_left</i>
+                </div>
+                <h4 class="text-center mb-4 ms-2">Added Item List</h4>
+            </div>
+            <div class="d-flex gap-3 search-input">
+                <div>
+                    <i class="mt-1 material-icons icon icon-btn"
+                        style="cursor: pointer;"
+                        data-bs-placement="top"
+                        data-bs-toggle="tooltip"
+                        data-bs-custom-class="custom-tooltip"
+                        title="Export data"
+                        id="exportItem">arrow_upward</i>
+                </div>
+                <div>
+                    <i class="mt-1 material-icons icon icon-btn"
+                        style="cursor: pointer;"
+                        data-bs-placement="top"
+                        data-bs-toggle="tooltip"
+                        data-bs-custom-class="custom-tooltip"
+                        title="Select item"
+                        id="selectItem">check</i>
+                </div>
+                <div>
+                    <i class="mt-1 material-icons icon icon-btn"
+                        style="cursor: pointer;"
+                        data-bs-placement="top"
+                        data-bs-toggle="tooltip"
+                        data-bs-custom-class="custom-tooltip"
+                        title="Select all"
+                        id="selectAllItem">done_all</i>
+                </div>
+                <div class="me-5">
+                    <i class="mt-1 material-icons icon icon-btn"
+                        style="cursor: pointer;"
+                        data-bs-placement="top"
+                        data-bs-toggle="tooltip"
+                        data-bs-custom-class="custom-tooltip"
+                        title="Delete selected"
+                        id="deleteSelected">delete</i>
+                </div>
+                <input type="search" class="search-box search-width form-control rounded-5 font me-4" id="searchPulledItem" placeholder="Search code or date">
+                    
+            </div>
+        </div>
+        <div class="table-container table-responsive">
+                <table class="table font table-hover" id="addedItemTable">
+                    <thead id="tableHead">
+                        <tr>
+                            <th id="checkboxColumn" style="width: 3rem; display: none;">
+                                <input type="checkbox" id="selectAllCheckbox">
+                            </th>
+                            <th>No.</th>
+                            <th>Code</th>
+                            <th style="min-width: 18rem;">Item</th>
+                            <th>QTY</th>
+                            <th>Unit</th>
+                            <th>Added by</th>
+                            <th style="width: 12rem;">Date</th>
+                            <th style="width: 4rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pulledItemTable">
+
+                    </tbody>
+                </table>
+        </div>
+    </div>
+    <!-- Delete Item Modal -->
+    <div class="modal" id="deleteItemModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body font p-4 pb-2">
+                    <form method="post" id="deleteItemForm">
+                        <input type="hidden" id="deleteItemId">
+                        <div class="font mb-4">
+                            <p>Are sure to delete item <i><span id="deleteItemCode"></span> <span id="deleteItemName"></span></i>?</p>
+                        </div>
+                        <div class="modal-footer font">
+                            <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Close</button>
+                            <button class="btns secondary-btn rounded-5 font" type="submit">Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/utils/toast.js"></script>
+    <script src="./js/getAddedItems.js"></script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../node_modules/toastify-js/src/toastify.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  username   String   @unique
+  name       String
+  password   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Item {
+  id         Int      @id @default(autoincrement())
+  item_code  String?   @unique
+  item_name  String
+  quantity   Int
+  unit       String   @default("pcs")
+  added_by   String
+  updated_by String?
+  date       DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  Log Log[]
+}
+
+model PulledItem {
+  id               String   @id @default(cuid())
+  itemCode         String
+  itemName         String
+  releasedQuantity Int
+  unit             String
+  releasedBy       String
+  receivedBy       String
+  releasedDate     DateTime @default(now())
+}
+
+model AddedItem {
+  id            String   @id @default(cuid())
+  itemCode      String
+  itemName      String
+  addedQuantity Int
+  unit          String
+  addedBy       String
+  addedDate     DateTime @default(now())
+}
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  itemId    Int
+  log       String
+  user      String?
+  createdAt DateTime @default(now())
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
