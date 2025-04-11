@@ -2,24 +2,20 @@ import { app, BrowserWindow, ipcMain, Menu, shell, dialog } from "electron";
 import fs from "fs";
 import path from "path";
 import {
-  addItem,
-  getItems,
-  pullItem,
-  getPullItems,
-  updateItemQuantity,
-  deleteItem,
-  editItem,
-  deleteItemFromTable,
-  addAddedItem,
+  pullEquipment,
+  updateEquipmentQuantity,
   addLog,
   getLog,
   deleteAllLogs,
-  getAddedItems,
-  prisma
+  prisma,
+  checkLogin,
+  autoAccountCreate,
+  getEquipmentList,
+  addEquipment,
+  editEquipment
 } from "./database";
 import { execSync } from "child_process";
 import * as XLSX from "xlsx";
-import {parse} from "csv-parse";
 
 const isDev = !app.isPackaged;
 
@@ -27,8 +23,8 @@ if (!isDev) {
   try {
     console.log("Running Prisma Migration...");
     const output = execSync("npx prisma migrate deploy", {
-      stdio: "pipe", // Capture logs
-      encoding: "utf-8", // Ensure readable output
+      stdio: "pipe",
+      encoding: "utf-8",
     });
     console.log("Migration Output:\n", output);
   } catch (error: any) {
@@ -38,10 +34,10 @@ if (!isDev) {
 
 function capitalizeWords(str: string) {
   return str
-      .toLowerCase() // Convert entire string to lowercase first
-      .split(" ") // Split into words
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize first letter
-      .join(" "); // Join words back into a string
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
 }
 
 let mainWindow: BrowserWindow | null;
@@ -49,17 +45,20 @@ app.whenReady().then(() => {
   mainWindow = new BrowserWindow({
     width: 1366,
     height: 768,
-    icon: path.join(__dirname, "../assets/icons/cpsc-logo.png"), // Set icon path
+    icon: path.join(__dirname, "../assets/icons/fire-logo-min.ico"),
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"), // Ensure TypeScript transpiles this correctly
-      nodeIntegration: false, // Disable for security
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: false,
       contextIsolation: true,
     },
   });
 
-  mainWindow.loadFile(path.join(app.getAppPath(), "public", "mainStock.html"));
+  mainWindow.loadFile(path.join(app.getAppPath(), "public", "login.html"));
 
-  // Apply the custom menu
+  autoAccountCreate()
+    .then(() => console.log("Account created successfully"))
+    .catch((error) => console.error("Error creating account:", error.message));
+
   Menu.setApplicationMenu(menu);
 });
 
@@ -98,7 +97,7 @@ const menu = Menu.buildFromTemplate([
           console.log("View Added Items clicked!");
         },
       },
-      { type: "separator" }, // Adds a divider
+      { type: "separator" },
       {
         label: "Exit",
         role: "quit",
@@ -148,43 +147,25 @@ const menu = Menu.buildFromTemplate([
   },
 ]);
 
-// Handle adding items
-ipcMain.handle("add-item", async (event, itemData) => {
+ipcMain.handle("add-equipment", async (event, equipmentData) => {
     try {
-        const item = await addItem(
-            itemData.item_code,
-            itemData.item_name,
-            itemData.quantity,
-            itemData.unit,
-            itemData.added_by,
-            itemData.date
+        const equipment = await addEquipment(
+            equipmentData.equipmentCode,
+            equipmentData.equipmentName,
+            equipmentData.quantity,
+            equipmentData.unit,
+            equipmentData.userId,
         );
-        return { success: true, message: "Item successfully added.",  item: item};
+        return { success: true, message: "Equipment successfully added.",  equipment: equipment};
     } catch (error: any) {
         return { success: false, message: error.message };
     }
 });
 
-ipcMain.handle("add-added-item", async (event, data) => {
-    try {
-        return await addAddedItem(
-        data.itemCode,
-        data.itemName,
-        data.addedQuantity,
-        data.unit,
-        data.addedBy
-        )
-    } catch (error) {
-      console.log(error)
-        return;
-    }
-})
-
 ipcMain.handle("add-log", async (event, logData) => {
     try {
         return await addLog(
-            logData.itemId,
-            logData.user,
+            logData.userId,
             logData.log
         )
     } catch (error) {
@@ -204,22 +185,12 @@ ipcMain.handle("delete-all-logs", async () => {
     return await deleteAllLogs();
   });
 
-ipcMain.handle("get-added-items", async () => {
-  try {
-    return await getAddedItems()
-  } catch (error) {
-    return;
-  }
-})
-
-ipcMain.handle("pull-item", async (event, pullData) => {
-  const item = await pullItem(
-    pullData.itemCode,
-    pullData.itemName,
-    pullData.releasedQuantity,
-    pullData.unit,
+ipcMain.handle("pull-equipment", async (event, pullData) => {
+  const item = await pullEquipment(
+    pullData.equipmentId,
+    pullData.fireFighterId,
     pullData.releasedBy,
-    pullData.receivedBy
+    pullData.quantity
   );
   if (item.success) {
     return { success: true, message: "Item successfully pulled.", item: item };
@@ -229,52 +200,37 @@ ipcMain.handle("pull-item", async (event, pullData) => {
   }
 });
 
-ipcMain.handle("get-items", async () => {
+ipcMain.handle("get-equipment-list", async () => {
   try {
-    return getItems(); // Fetch and return all items
+    return getEquipmentList(); // Fetch and return all items
   } catch (error) {
-    console.error("Error fetching items:", error);
+    console.error("Error fetching equipments:", error);
     return [];
   }
 });
 
-ipcMain.handle("get-pull-items", async () => {
-  try {
-    return getPullItems();
-  } catch (error) {
-    console.error("Error fetching pulled items.", error);
-    return [];
-  }
+// ipcMain.handle("get-pull-items", async () => {
+//   try {
+//     return getPullItems();
+//   } catch (error) {
+//     console.error("Error fetching pulled items.", error);
+//     return [];
+//   }
+// });
+
+ipcMain.handle("update-equipment-quantity", async (event, newQuantityData) => {
+  const { id, new_quantity} = newQuantityData;
+  return updateEquipmentQuantity(id, new_quantity);
 });
 
-ipcMain.handle("update-item-quantity", async (event, newQuantityData) => {
-  const { id, new_quantity, updated_by, date } = newQuantityData;
-  return updateItemQuantity(id, new_quantity, updated_by, date);
-});
-
-ipcMain.handle("delete-item", async (event, item) => {
+ipcMain.handle("edit-equipment", async (event, newData) => {
   try {
-    return deleteItem(item);
-  } catch (error) {
-    return [];
-  }
-})
-
-ipcMain.handle("delete-item-from-table", async (event, id, table) => {
-  try {
-    return deleteItemFromTable(id, table);
-  } catch (error) {
-    return [];
-  }
-})
-
-ipcMain.handle("edit-item", async (event, newData) => {
-  try {
-    return editItem(
+    return editEquipment(
       newData.id,
-      newData.item_code,
-      newData.item_name,
-      newData.unit
+      newData.equipmentCode,
+      newData.equipmentName,
+      newData.unit,
+      newData.status
     )
   } catch (error) {
     return;
@@ -301,35 +257,39 @@ app.on("window-all-closed", () => {
   }
 });
 
-ipcMain.handle("export-items", async (event, { tableName, selectedIds }: { tableName: string, selectedIds: (string | number)[] }) => {
+ipcMain.handle("export-items", async (event, { tableName, selectedIds }: { tableName: string, selectedIds: string[] }) => {
     try {
-        const validTables = ["item", "pulledItem", "log", "addedItem"];
+        const validTables = ["equipment", "pulledItem", "log", "addedItem"];
         if (!validTables.includes(tableName)) {
             return { success: false, message: `Invalid table: ${tableName}` };
         }
 
-        if (!selectedIds || selectedIds.length === 0) {
-            return { success: false, message: "No items selected." };
-        }
-
-        // Fetch only the selected items
-        const data = await (prisma as any)[tableName].findMany({
-            where: { id: { in: selectedIds } }
-        });
+        if (!selectedIds || !Array.isArray(selectedIds) || selectedIds.length === 0) {
+          return { success: false, message: "No items selected." };
+      }
+      
+      const data = await (prisma as any)[tableName].findMany({
+          where: {
+              id: {
+                  in: selectedIds.map(String),
+              },
+          },
+          include: { user: true },
+      });
 
         if (!data.length) {
             return { success: false, message: `No matching data found in ${tableName}.` };
         }
 
-        // Define column mappings for each table
         const columnMappings: Record<string, Record<string, string>> = {
-            item: {
-                item_code: "Code",
-                item_name: "Item",
+            equipment: {
+                equipmentCode: "Code",
+                equipmentName: "Item",
                 quantity: "Quantity",
                 unit: "Unit",
-                added_by: "Added by",
-                date: "Date"
+                status: "Status",
+                user: "Added by",
+                createdAt: "Date"
             },
             pulledItem: {
                 itemCode: "Code",
@@ -350,14 +310,18 @@ ipcMain.handle("export-items", async (event, { tableName, selectedIds }: { table
             }
         };
 
-        // Format data by renaming the columns
-        const formattedData = data.map(({ id, updated_by, updatedAt, ...rest }: any) => {
+        const formattedData = data.map(({ user, id, updatedBy, updatedAt, ...rest }: any) => {
             const formattedRow: Record<string, any> = {};
             for (const key in rest) {
                 if (columnMappings[tableName]?.[key]) {
                     formattedRow[columnMappings[tableName][key]] = rest[key];
                 }
             }
+
+            if (user && user.name) {
+              formattedRow["Added by"] = user.name;
+            }
+
             return formattedRow;
         });
 
@@ -377,78 +341,13 @@ ipcMain.handle("export-items", async (event, { tableName, selectedIds }: { table
         return { success: true, message: `${capitalizeWords(tableName)} exported.` };
     } catch (error) {
         console.error("Export error:", error);
-        return { success: false, message: `Failed to export ${tableName}.` };
+        return { success: false, message: `Failed to export ${tableName}: ${error}.` };
     }
 });
-
-
-ipcMain.handle("import-items", async () => {
-  try {
-    // Step 1: Open file dialog for selecting CSV or XLSX
-    const { filePaths, canceled } = await dialog.showOpenDialog({
-      title: "Select CSV or XLSX File",
-      filters: [
-        { name: "CSV & Excel Files", extensions: ["csv", "xlsx"] },
-      ],
-      properties: ["openFile"],
-    });
-
-    if (canceled || filePaths.length === 0) {
-      return;
-    }
-
-    const filePath = filePaths[0];
-
-    // Step 2: Check file extension
-    const fileExtension = filePath.split(".").pop()?.toLowerCase();
-    let records: any[] = [];
-
-    if (fileExtension === "csv") {
-      // Parse CSV File
-      const csvData = fs.readFileSync(filePath, "utf8");
-      const parser = parse(csvData, { columns: true, trim: true });
-
-      for await (const record of parser) {
-        records.push(formatRecord(record));
-      }
-    } else if (fileExtension === "xlsx") {
-      // Parse XLSX File
-      const workbook = XLSX.readFile(filePath);
-      const sheetName = workbook.SheetNames[0]; // Get first sheet
-      const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-      records = sheetData.map(formatRecord);
-    } else {
-      return { success: false, message: "Invalid file format." };
-    }
-
-    // Step 3: Insert into database using Prisma
-    if (records.length > 0) {
-      await prisma.item.createMany({ data: records });
-      return { success: true, message: "Items imported." };
-    } else {
-      return { success: false, message: "No valid data found to import." };
-    }
-  } catch (error) {
-    console.error("Import error:", error);
-    return { success: false, message: "Failed to import items." };
-  }
-});
-
-function formatRecord(record: any) {
-  return {
-    item_code: record.item_code?.toUpperCase() || "",
-    item_name: record.item_name?.trim() || "",
-    quantity: Number(record.quantity) || 0,
-    unit: record.unit?.trim() || "pcs",
-    added_by: record.added_by?.trim() || "Admin",
-    date: record.date ? new Date(record.date) : new Date(),
-  };
-}
 
 ipcMain.handle("delete-selected-items", async (event, { tableName, selectedIds }: { tableName: string, selectedIds: (string | number)[] }) => {
   try {
-    const validTables = ["item", "pulledItem", "log", "addedItem"];
+    const validTables = ["equipment", "equipmentLog", "firefighter"];
     if (!validTables.includes(tableName)) {
       return { success: false, message: `Invalid table: ${tableName} sdds` };
     }
@@ -457,14 +356,12 @@ ipcMain.handle("delete-selected-items", async (event, { tableName, selectedIds }
       return { success: false, message: "No items selected." };
     }
 
-    // Convert IDs to numbers only for tables that require integer IDs
-    const tablesWithIntIds = ["item", "log"]; // Tables that use integer IDs
+    const tablesWithIntIds = ["item", "log"];
     const formattedIds =
       tablesWithIntIds.includes(tableName) 
-        ? selectedIds.map(id => (typeof id === "string" ? parseInt(id, 10) : id)) // Convert only if needed
-        : selectedIds; // Keep as string if table allows string IDs
+        ? selectedIds.map(id => (typeof id === "string" ? parseInt(id, 10) : id))
+        : selectedIds;
 
-    // Delete only the selected items
     const result = await (prisma as any)[tableName].deleteMany({
       where: { id: { in: formattedIds } },
     });
@@ -479,3 +376,48 @@ ipcMain.handle("delete-selected-items", async (event, { tableName, selectedIds }
     return { success: false, message: `Failed to delete items from ${tableName}.` + (error as Error).message };
   }
 });
+
+ipcMain.handle("check-login", async (event, data) => {
+  try {
+      const response = await checkLogin(
+          data.username,
+          data.password
+      )
+      return response;
+  } catch (error: any) {
+      return;
+  }
+})
+
+ipcMain.handle('add-firefighter', async (_, firefighterData) => {
+    try {
+        const firefighter = await prisma.firefighter.findUnique({
+            where: { employeeId: firefighterData.employeeId }
+        })
+        if (firefighter) {
+            return { success: false, message: `Firefighter with ID '${firefighter.employeeId}' already exists.` };
+        }
+        const newFirefighter = await prisma.firefighter.create({
+            data: firefighterData,
+        });
+        return { success: true, message: "Firefighter added successfully.", newFirefighter: newFirefighter };
+    } catch (error) {
+        return { success: false, message: (error as Error).message };
+    }
+});
+
+ipcMain.handle("get-firefighters", async () => {
+    try {
+      const firefighters = await prisma.firefighter.findMany({
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+      return { success: true, data: firefighters };
+    } catch (error) {
+      console.error("Error fetching firefighters:", error);
+      return { success: false, message: (error as Error).message };
+    }
+  });
+  

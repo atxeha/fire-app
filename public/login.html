@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+            default-src 'self';
+            script-src 'self';
+            style-src 'self' 'unsafe-inline';
+            img-src 'self' data:;
+    ">
+    <title>BFP Camiguin</title>
+
+    <link rel="stylesheet" href="../node_modules/toastify-js/src/toastify.css">
+
+    <link rel="stylesheet" href="../node_modules/material-icons/iconfont/material-icons.css">
+
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="./css/index.css">
+
+    <link rel="stylesheet" href="./css/login.css">
+
+
+</head>
+<body>
+
+    <div class="login-container rounded-4 mb-3">
+        <div class="mb-4 d-flex ms-2 ps-3">
+            <img src="../assets/icons/fire-logo.ico" alt="Logo" class="logo">
+            <h4 class="text-center mt-3 ms-2">BFP Camiguin</h4>
+        </div>
+        <form method="post" id="loginForm">
+            <div class="mb-3 font">
+                <label for="username" class="form-label mb-2 ms-2">Username</label>
+                <input id="username" type="text" class="form-control search-box rounded-5 font">
+            </div>
+            <div class="font position-relative">
+                <label for="password" class="form-label mb-2 ms-2">Password</label>
+                <input id="password" type="password" class="form-control search-box rounded-5 font">
+                <i class="material-icons toggle-password mt-2 pt-3" id="toggleIcon">visibility_off</i>
+            </div>
+            <p class="mb-4 ms-2 mt-1" style="font-size: .75rem;"><a href="#">Forgot password</a></p>
+            <button type="submit" class="btns secondary-btn rounded-5 font w-100 mb-3">Login</button>
+        </form>
+    </div>
+    <script src="./js/utils/login.js"></script>
+    <script src="./js/utils/toast.js"></script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../node_modules/toastify-js/src/toastify.js"></script>
+    
+</body>
+</html>

@@ -6,25 +6,25 @@
 }
 
 body {
-    color: #3C374D;
+    color: #5a354c;
     font-family: 'Poppins', sans-serif;
-    /* background-color: #3C374D; */
+    /* background-color: #5a354c; */
 }
 
 th,
 td {
-    color: #3C374D !important;
+    color: #5a354c !important;
 }
 
 td, th {
-    padding: .8rem .5rem .25rem .5rem !important;
+    padding: .9rem .5rem .25rem .5rem !important;
 }
 .font {
     font-size: 0.9rem !important;
 }
 .search-box {
     height: 32px;
-    border: 1px solid #9c96b4;
+    border: 1px solid #b67b7b;
     padding: 0 1rem;
     transition: all 0.1s ease-in;
 }
@@ -35,8 +35,8 @@ td, th {
 .search-box:hover,
 .search-btn:hover,
 .primary-btn:hover {
-    border: 1px solid #9c96b4;
-    box-shadow: 0 0 5px #9c91ca;
+    border: 1px solid #b67b7b;
+    box-shadow: 0 0 5px #b67b7b;
     transition: all 0.1s ease-in;
 }
 
@@ -45,8 +45,8 @@ td, th {
 }
 
 .secondary-btn:hover {
-    border: 1px solid #cbc7dd;
-    box-shadow: 0 0 5px #9c91ca;
+    border: 1px solid #b67b7b;
+    box-shadow: 0 0 5px #b67b7b;
     transition: all 0.1s ease-in;
 }
 
@@ -81,8 +81,8 @@ td, th {
 .search-btn {
     height: 32px;
     width: 51px;
-    border: 1px solid #9c96b4;
-    background-color: #9c96b4;
+    border: 1px solid #b67b7b;
+    background-color: #b67b7b;
 }
 
 .dlt-icon {
@@ -99,12 +99,12 @@ td, th {
 }
 .icon-btn {
     border-radius: 5px;
-    color: #3C374D;
+    color: #5a354c;
     transition: all 0.1s ease-in;
 
 }
 .icon-btn:hover {
-    box-shadow: 0 0 5px #9c91ca;
+    box-shadow: 0 0 5px #b67b7b;
     transition: all 0.1s ease-in;
 }
 .btns {
@@ -116,13 +116,13 @@ td, th {
     height: 30px !important;
 }
 .primary-btn {
-    border: 1px solid #9c96b4;
-    background-color: #9c96b4;
+    border: 1px solid #b67b7b;
+    background-color: #b67b7b;
 }
 
 .secondary-btn {
-    border: 1px solid #cbc7dd;
-    background-color: #cbc7dd;
+    border: 1px solid #b67b7b;
+    background-color: #b67b7b;
 }
 .btn-close {
     font-size: .9rem;
@@ -140,34 +140,37 @@ td, th {
 
 .search-icon {
     padding-top: 3px;
-    color: #3C374D
+    color: #5a354c
 }
 
 input[type="checkbox"] {
-    accent-color: #332958;
+    accent-color: #7a5364;
     width: 13px;
     height: 13px;
     font-size: small;
 }
 
 .selected-row td {
-    background-color: #eceaf1 !important;
+    background-color: #ebd0d0 !important;
 }
 
 .actions {
     text-align: end;
     margin-right: 2.5rem !important;
+    padding-top: .75rem !important; 
 }
 
 .tooltip-inner {
-    background-color: #e0dcf1 !important;
+    background-color: #dfbdbd !important;
     color: #000 !important;
     font-size: 12px;
     border-radius: 5px;
+    max-width: 1000px !important;
 }
 .custom-tooltip {
-    --bs-tooltip-bg: #e0dcf1;
+    --bs-tooltip-bg: #dfbdbd;
     --bs-tooltip-color: #000;
+    max-width: 1000px !important;
 }
 
 ::-webkit-scrollbar {

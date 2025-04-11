@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (event.data.type === "show-toast") {
             Toastify({
                 text: event.data.message,
-                duration: 3500,
+                duration: 3000,
                 close: true,
                 gravity: "top",
                 position: "right",

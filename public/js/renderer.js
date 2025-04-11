@@ -1,11 +1,29 @@
 const checkboxColumn = document.getElementById("checkboxColumn");
+const user = JSON.parse(localStorage.getItem("activeUser"));
 
 document.addEventListener("DOMContentLoaded", async () => {
+
+    if (!user) {
+        window.electronAPI.navigate("login.html");
+        return;
+    }
+
+    const loginMessage = localStorage.getItem("loginMessage");
+
+    if (loginMessage) {
+        
+        window.electronAPI.showToast(loginMessage, true);
+
+        localStorage.removeItem("loginMessage");
+    }
+
     let searchQuery = "";
 
+    getFirefighterList()
     fetchAndDisplayItems(searchQuery);
 
     const addItemForm = document.getElementById("addItemForm");
+    const addFirefighterForm = document.getElementById("addFirefighterForm")
     const viewPulledItem = document.getElementById("viewPulledItem");
     const viewAddedItem = document.getElementById("viewAddedItem")
     const pullItemForm = document.getElementById("pullItemForm");
@@ -18,6 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const updateItemQuantityModal = new bootstrap.Modal(document.getElementById("updateItemQuantityModal"));
     const editItemModal = new bootstrap.Modal(document.getElementById("editItemModal"));
     const deleteAllLogModal = new bootstrap.Modal(document.getElementById("deleteAllLogModal"));
+    const addFirefighterModal = new bootstrap.Modal(document.getElementById("addFirefighterModal"));
 
     const deleteAllLog = document.getElementById("deleteAllLogForm");
 
@@ -34,34 +53,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     const importButton = document.getElementById("importItem")
     const deleteSelectedBtn = document.getElementById("deleteSelected")
 
+    const select = document.getElementById("pullfireFighterId");
+
+    async function getFirefighterList() {
+        const response = await window.electronAPI.getFirefighters();
+        if (response.success) {
+            response.data.forEach((firefighter) => {
+            const option = document.createElement("option");
+            option.value = firefighter.id;
+            option.textContent = `${firefighter.name}`;
+            select.appendChild(option);
+            });
+        } else {
+            console.error("Failed to load firefighters:", response.message);
+        }
+    }
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+
+            localStorage.setItem("logoutMessage", "logout successful.");
+            localStorage.removeItem("activeUser");
+            localStorage.removeItem("loginMessage");
+
+            await window.electronAPI.navigate("login.html")
+        })
+    }
+
     if (exportButton) {
         exportButton.addEventListener("click", async () => {
             const checkboxes = document.querySelectorAll(".rowCheckbox:checked");
-            const selectedIds = Array.from(checkboxes).map(checkbox => Number(checkbox.dataset.id));
+            const selectedIds = Array.from(checkboxes).map(checkbox => String(checkbox.dataset.id));
 
             if (selectedIds.length === 0) {
                 window.electronAPI.showToast("No items selected.", false);
                 return;
             }
-            const tableName = "item"; // Change dynamically based on your UI
+            const tableName = "equipment"; // Change dynamically based on your UI
             const response = await window.electronAPI.exportItems({ tableName, selectedIds });
 
             window.electronAPI.showToast(response.message, response.success);
-        });
-    }
-
-    if (importButton) {
-        importButton.addEventListener("click", async () => {
-        const response = await window.electronAPI.importItems();
-
-        if (response.success) {
-            window.electronAPI.showToast(response.message, true);
-            fetchAndDisplayItems();
-            return;
-        } 
-        window.electronAPI.showToast(response.message, false);
-        console.log(response.message)
-        
         });
     }
 
@@ -96,11 +128,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                     });
                 };
             };
+            console.log("one", ifSelected)
         });
     };
     
     if (selectAllIcon) {
         selectAllIcon.addEventListener("click", () => {
+            if (ifSelected && selectItemIcon) {
+                selectItemIcon.click();
+            }
+
             const checkboxCells = document.querySelectorAll(".checkboxCell input");
             const rows = document.querySelectorAll("#itemsTableBody tr");
 
@@ -125,6 +162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     };
                 });
             };
+            console.log("all", ifSelected)
         });
     };
 
@@ -176,7 +214,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
         });
     };
-    
+
     function capitalizeWords(str) {
         return str
             .toLowerCase() // Convert entire string to lowercase first
@@ -208,33 +246,32 @@ document.addEventListener("DOMContentLoaded", async () => {
             addItemForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
 
-                const itemCode = document.getElementById("addItemCode").value.trim().toUpperCase();
-                const itemName = capitalizeWords(document.getElementById("addItemName").value.trim());
+                const equipmentCode = document.getElementById("equipmentCode").value.trim().toUpperCase();
+                const equipmentName = capitalizeWords(document.getElementById("equipmentName").value.trim());
                 const quantity = parseInt(
-                document.getElementById("addQuantity").value.trim() || "0",
+                document.getElementById("quantity").value.trim() || "0",
                 10
                 );
-                const unit = capitalizeWords(document.getElementById("addUnit").value.trim());
-                const date = document.getElementById("addDate").value.trim();
-                const addedBy = capitalizeWords(document.getElementById("addedBy").value.trim());
+                const unit = capitalizeWords(document.getElementById("unit").value.trim());
+                // const date = document.getElementById("addDate").value.trim();
+                const activeUser = user.id;
 
-                if (!itemCode || !itemName || !quantity || !unit || !date || !addedBy) {
+                if (!equipmentCode || !equipmentName || !quantity || !unit) {
                     window.electronAPI.showToast("All fields are required.", false);
                     return;
                 }
 
-                const itemData = {
-                    item_code: itemCode,
-                    item_name: itemName,
+                const equipmentData = {
+                    equipmentCode: equipmentCode,
+                    equipmentName: equipmentName,
                     quantity: quantity,
                     unit: unit,
-                    date: new Date(date),
-                    added_by: addedBy,
+                    userId: activeUser,
                 };
 
-                console.log("Sending item data:", itemData);
+                console.log("Sending item data:", equipmentData);
 
-                const response = await window.electronAPI.addItem(itemData);
+                const response = await window.electronAPI.addEquipment(equipmentData);
 
                 // Show success or error toast based on response
                 if (response.success) {
@@ -244,30 +281,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ifSelected = false;
                     fetchAndDisplayItems(searchQuery);
 
-                    const data = {
-                        itemCode: response.item.item_code,
-                        itemName: response.item.item_name,
-                        addedQuantity: response.item.quantity,
-                        unit: response.item.unit,
-                        addedBy: response.item.added_by
-                    }
                     const logData = {
-                        itemId: response.item.id,
-                        user: addedBy,
-                        log: quantity === 1 ? `Added ${quantity} new ${unit.toLowerCase()} of item` : `Added ${quantity} new ${unit.toLowerCase()}s of item`
+                        userId: user.id,
+                        log: `Added new equipment: ${quantity} new ${quantity < 2 ? `${unit.toLowerCase()}` : `${unit.toLowerCase()}s`} of (${equipmentName}).`
                     }
 
-                    try {
-                        window.electronAPI.addAddedItem(data);
-                    } catch (error) {
-                        console.log(error)
-                    }
                     try {
                         window.electronAPI.addLog(logData);
                     } catch (error) {
                         console.log(error)
                     }
-                    
 
                 } else {
                     window.electronAPI.showToast(response.message, false);
@@ -275,16 +298,66 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         }
 
+        if (addFirefighterForm) {
+            addFirefighterForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const employeeId = parseInt(document.getElementById("employeeId").value.trim() || "0", 10);
+                const name = capitalizeWords(document.getElementById("name").value.trim());
+                const gender = document.getElementById("gender").value.trim().toUpperCase();
+                const rank = document.getElementById("rank").value.trim().toUpperCase();
+                const contactNumber = parseInt(document.getElementById("contactNumber").value.trim() || "0", 10);
+                const email = document.getElementById("email").value.trim();
+                const address = capitalizeWords(document.getElementById("address").value.trim());
+                const status = document.getElementById("status").value.trim().toUpperCase();
+
+                if (!employeeId || !name || !gender || !rank || !contactNumber || !address || !status) {
+                    window.electronAPI.showToast("All fields are required.", false);
+                    return;
+                }
+
+                const data = {
+                    employeeId,
+                    name,
+                    gender,
+                    rank,
+                    contactNumber,
+                    email,
+                    address,
+                    status
+                }
+
+                const response = await window.electronAPI.addFirefighter(data);
+                if (response.success) {
+                    window.electronAPI.showToast(response.message, true);
+                    addFirefighterModal.hide()
+                    select.innerHTML = ``;
+                    getFirefighterList()
+
+                    const logData = {
+                        userId: user.id,
+                        log: `Added new firefighter: (${response.newFirefighter.rank}. ${response.newFirefighter.name}).`
+                    }
+
+                    try {
+                        window.electronAPI.addLog(logData);
+                    } catch (error) {
+                        console.log(error)
+                    }
+                } else {
+                    window.electronAPI.showToast(response.message, false);
+                }
+            })
+        }
+
         if (pullItemForm) {
             pullItemForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
 
-                const itemCode = document.getElementById("pullItemCode").value.trim();
-                const itemName = document.getElementById("pullItemName").value.trim();
-                const quantity = parseInt(document.getElementById("pullQuantity").value.trim() || "0", 10);
-                const unit = document.getElementById("pullUnit").value.trim();
+                const equipmentId = document.getElementById("pullEquipmentId").value.trim();
+                const fireFighterId = document.getElementById("pullfireFighterId").value.trim();
                 const releasedBy = capitalizeWords(document.getElementById("pullReleasedBy").value.trim());
-                const receivedBy = capitalizeWords(document.getElementById("pullReceivedBy").value.trim());
+                const quantity = parseInt(document.getElementById("pullQuantity").value.trim() || "0", 10);
 
                 console.log(itemCode, itemName, unit, quantity, releasedBy, receivedBy)
 
@@ -299,7 +372,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     releasedQuantity: Number(quantity),
                     unit: unit,
                     releasedBy: releasedBy,
-                    receivedBy: receivedBy,
                 };
 
                 try {
@@ -336,10 +408,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     const itemId = document.getElementById("newQuantityItemId").value.trim();
                     const quantity = document.getElementById("newQuantity").value.trim();
-                    const date = document.getElementById("newQuantityDate").value.trim();
-                    const updatedBy = capitalizeWords(document.getElementById("newUpdatedBy").value.trim());
 
-                    if (!itemId || !quantity || !date || !updatedBy) {
+                    if (!itemId || !quantity) {
                         window.electronAPI.showToast("All fields are required.", false);
                         return;
                     }
@@ -347,12 +417,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     const newQuantityData = {
                         id: itemId,
                         new_quantity: new Number(quantity),
-                        date: new Date(date),
-                        updated_by: updatedBy,
                     }
 
                 try {
-                    const response = await window.electronAPI.updateItemQuantity(newQuantityData);
+                    const response = await window.electronAPI.updateEquipmentQuantity(newQuantityData);
 
                     if (response.success) {
                         window.electronAPI.showToast(response.message, true);
@@ -362,10 +430,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                         fetchAndDisplayItems(searchQuery);
 
                         const logData = {
-                            itemId: response.item.id,
-                            user: updatedBy,
-                            log: quantity < 2 ? `Added ${quantity} new ${response.item.unit.toLowerCase()} for item` : `Added ${quantity} new ${response.item.unit.toLowerCase()}s for item`
-                        }
+                            userId: user.id,
+                            log: `Quantity updated: Added ${quantity} ${quantity < 2 ? `${response.equipment.unit.toLowerCase()}` : `${response.equipment.unit.toLowerCase()}s`} of (${response.equipment.equipmentName})`
+                    }
                         try {
                             window.electronAPI.addLog(logData);
                             console.log("quantity log saved")
@@ -406,7 +473,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     return;
                 }
         
-                const tableName = "item";
+                const tableName = "equipment";
                 const response = await window.electronAPI.deleteSelectedItems(tableName, selectedIds);
         
                 document.getElementById("checkboxColumn").style.display = "none";
@@ -420,22 +487,22 @@ document.addEventListener("DOMContentLoaded", async () => {
             editItemForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
 
-                const itemId = document.getElementById("editItemId").value.trim();
-                const itemCode = document.getElementById("editItemCode").value.trim().toUpperCase();
-                const itemName = capitalizeWords(document.getElementById("editItemName").value.trim());
+                const equipmentId = document.getElementById("editEquipmentId").value.trim();
+                const equipmentCode = document.getElementById("editEquipmentCode").value.trim().toUpperCase();
+                const equipmentName = capitalizeWords(document.getElementById("editEquipmentName").value.trim());
                 const unit = document.getElementById("editUnit").value.trim();
-
-                const item = Number(itemId)
+                const status = document.getElementById("editStatus").value.trim();
 
                 const newData = {
-                        id: item,
-                        item_code: itemCode,
-                        item_name: itemName,
+                        id: equipmentId,
+                        equipmentCode: equipmentCode,
+                        equipmentName: equipmentName,
                         unit: unit,
+                        status: status,
                     }
 
                 try {
-                    const response = await window.electronAPI.editItem(newData)
+                    const response = await window.electronAPI.editEquipment(newData)
                     if (response.success) {
                         window.electronAPI.showToast(response.message, true);
                         editItemModal.hide();
@@ -443,15 +510,41 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ifSelected = false;
                         fetchAndDisplayItems(searchQuery);
 
+                        const oldEquipment = response.equipment
+                        const newEquipment = response.newEquipment
+
+                        const changes = {};
+                        
+                        for (const key in newEquipment) {
+                            if (key === 'createdAt' || key === 'updatedAt') continue;
+                          
+                            if (oldEquipment[key] !== newEquipment[key]) {
+                          
+                              changes[key] = {
+                                old: oldEquipment[key],
+                                new: newEquipment[key]
+                              };
+                            }
+                          }
+                          const fieldNameMap = {
+                            equipmentCode: "Code",
+                            equipmentName: "Equipment",
+                            unit: "Unit",
+                            status: "Status",
+                          };
+                          
+                          const formattedFields = `(${Object.entries(changes)
+                            .map(([key]) => fieldNameMap[key] || key)
+                            .join(", ")})`;
+
                         const logData = {
-                            itemId: response.item.id,
-                            user: "",
-                            log: `Updated information of item`
+                            userId: user.id,
+                            log: `${Object.keys(changes).length} ${Object.keys(changes).length < 2 ? "field" : "fields"} updated in (${oldEquipment.equipmentName}). ${Object.keys(changes).length < 2 ? "Field" : "Fields"}${formattedFields}`
                         }
                         try {
                             window.electronAPI.addLog(logData);
                             console.log("quantity log saved")
-                        } catch (error) {
+                        } catch (error) {   
                             console.log(error)
                         }
                     } else {
@@ -490,11 +583,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const selectedItem = items.find((item) => item.id == itemId);
 
       if (selectedItem) {
-        document.getElementById("itemCode").textContent = selectedItem.item_code;
-        document.getElementById("itemName").textContent = selectedItem.item_name;
+        document.getElementById("itemCode").textContent = selectedItem.equipmentCode;
+        document.getElementById("itemName").textContent = selectedItem.equipmentName;
         document.getElementById("itemStock").textContent = selectedItem.quantity;
-        document.getElementById("pullItemCode").value = selectedItem.item_code;
-        document.getElementById("pullItemName").value = selectedItem.item_name;
+
+        document.getElementById("pullReleasedBy").value = user.name
+        document.getElementById("pullItemCode").value = selectedItem.equipmentCode;
+        document.getElementById("pullItemName").value = selectedItem.equipmentName;
         document.getElementById("pullUnit").value = selectedItem.unit;
       }
     }
@@ -510,9 +605,9 @@ document.addEventListener("DOMContentLoaded", function () {
             const selectedItem = items.find((item) => item.id == itemId);
 
             if (selectedItem) {
-                document.getElementById("newItemCode").textContent = selectedItem.item_code;
-                document.getElementById("newItemName").textContent = selectedItem.item_name;
-                document.getElementById("newItemStock").textContent = selectedItem.quantity;
+                document.getElementById("newEquipmentCode").textContent = selectedItem.equipmentCode;
+                document.getElementById("newEquipmentName").textContent = selectedItem.equipmentName;
+                document.getElementById("newEquipmentStock").textContent = selectedItem.quantity;
                 document.getElementById("newQuantityItemId").value = selectedItem.id;
             }
         }
@@ -527,11 +622,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const selectedItem = items.find((item) => item.id == itemId);
 
         if (selectedItem) {
-            document.getElementById("editItemCode").value = selectedItem.item_code;
-            document.getElementById("editItemName").value = selectedItem.item_name;
-            document.getElementById("editItemId").value = selectedItem.id;
+            document.getElementById("editEquipmentCode").value = selectedItem.equipmentCode;
+            document.getElementById("editEquipmentName").value = selectedItem.equipmentName;
+            document.getElementById("editEquipmentId").value = selectedItem.id;
             document.getElementById("editUnit").value = selectedItem.unit;
-            document.getElementById("editQuantity").value = selectedItem.quantity;
+            document.getElementById("editStatus").value = selectedItem.status;
       }
     }
   });
@@ -544,7 +639,7 @@ document.getElementById("searchItem").addEventListener("input", (event) => {
 
 async function fetchAndDisplayItems(searchQuery = "") {
   try {
-    items = await window.electronAPI.getItems();
+    items = await window.electronAPI.getEquipmentList();
     const itemTable = document.getElementById("inventoryTable") 
     const tableHead = document.getElementById("itemsTableHead")
     const tableBody = document.getElementById("itemsTableBody");
@@ -552,9 +647,9 @@ async function fetchAndDisplayItems(searchQuery = "") {
     tableBody.innerHTML = "";
 
     const filteredItems = items.filter(item => {
-        const itemCodeMatch = item.item_code.toLowerCase().includes(searchQuery.toLowerCase());
+        const itemCodeMatch = item.equipmentCode.toLowerCase().includes(searchQuery.toLowerCase());
 
-        const itemDate = new Date(item.date)
+        const itemDate = new Date(item.createdAt)
             .toLocaleString("en-US", {
             timeZone: "Asia/Manila",
             year: "2-digit",
@@ -580,7 +675,7 @@ async function fetchAndDisplayItems(searchQuery = "") {
         tableHead.style.display = "none";
         tableBody.innerHTML = `
             <tr>
-            <td colspan="9" class="text-center text-muted p-3 pt-4"><h6>No item found</h6></td>
+            <td colspan="9" class="text-center text-muted p-3 pt-4"><h6>No equipment found</h6></td>
             </tr>
         `;
       return;
@@ -589,58 +684,71 @@ async function fetchAndDisplayItems(searchQuery = "") {
     tableHead.style.display = "table-header-group";
 
     filteredItems.forEach((item, index) => {
-      const row = document.createElement("tr");
+        
+        function itemStatus(status) {
+            const colorMap = {
+                ACTIVE: "#5ac072",
+                IN_REPAIR: "#ff9e4e",
+                RETIRED: "#6c757d",
+                LOST: "#db5a67",
+            };
+            return `background-color: ${colorMap[status] || "#000"}; color:#ffffff;`;
+        }
+        
+        const row = document.createElement("tr");
 
-      row.setAttribute("style", "border-radius: 10px !important;")
+        row.setAttribute("style", "border-radius: 10px !important;")
 
-      const formattedDate = new Date(item.updatedAt)
-        .toLocaleString("en-US", {
-          timeZone: "Asia/Manila",
-          year: "2-digit",
-          month: "numeric",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-          hourCycle: "h12",
-        })
-        .replace("AM", "am")
-        .replace("PM", "pm")
-        .replace("/", "-")
-        .replace("/", "-")
-        .replace(",", " --");
-    
-      row.innerHTML = `
-        <td class="checkboxCell" style="display: none;">
-            <input type="checkbox" class="rowCheckbox" data-id="${item.id}">
-        </td>
-        <td>${index + 1}</td>
-        <td>${item.item_code}</td>
-        <td>${item.item_name}</td>
-        <td>${item.quantity}</td>
-        <td>${item.unit}</td>
-        <td>${formattedDate}</td>
-        <td class="actions">
-            <span data-bs-toggle="modal" data-bs-target="#editItemModal">
-                <i id="edit-${item.id}" class="edit-icon icon-btn icon material-icons edit-item" data-bs-toggle="tooltip"
-                    data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Edit">edit</i>
-            </span>
-            <span data-bs-toggle="modal" data-bs-target="#updateItemQuantityModal">
-              <i id="new-quantity-${
-                item.id
-              }" class="ms-1 icon-btn icon material-icons new-quantity" data-bs-toggle="tooltip"
-                  data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Add stock"
-                  style="cursor:pointer;">add</i>
-            </span>
-            <span data-bs-toggle="modal" data-bs-target="#pullItemModal">
-                <i id="pull-${
-                  item.id
-                }" class="ms-1 icon-btn icon material-icons pull-item" data-bs-toggle="tooltip"
-                    data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Pull item"
-                    style="cursor:pointer;">arrow_outward</i>
-            </span>
-        </td>
-    `;
-      tableBody.appendChild(row);
+        const formattedDate = new Date(item.createdAt)
+            .toLocaleString("en-US", {
+            timeZone: "Asia/Manila",
+            year: "2-digit",
+            month: "numeric",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hourCycle: "h12",
+            })
+            .replace("AM", "am")
+            .replace("PM", "pm")
+            .replace("/", "-")
+            .replace("/", "-")
+            .replace(",", " --");
+        
+        row.innerHTML = `
+            <td class="checkboxCell" style="display: none;">
+                <input type="checkbox" class="rowCheckbox" data-id="${item.id}">
+            </td>
+            <td>${index + 1}</td>
+            <td>${item.equipmentCode}</td>
+            <td>${item.equipmentName}</td>
+            <td>${item.quantity}</td>
+            <td>${item.unit}</td>
+            <td>${formattedDate}</td>
+            <td>${item.user.name}</td>
+            <td><span class="badge d-flex justify-content-center" style="${itemStatus(item.status)}">${item.status}</span></td>
+            <td class="actions">
+                <span data-bs-toggle="modal" data-bs-target="#editItemModal">
+                    <i id="edit-${item.id}" class="edit-icon icon-btn icon material-icons edit-item" data-bs-toggle="tooltip"
+                        data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Edit">edit</i>
+                </span>
+                <span data-bs-toggle="modal" data-bs-target="#updateItemQuantityModal">
+                <i id="new-quantity-${
+                    item.id
+                }" class="ms-1 icon-btn icon material-icons new-quantity" data-bs-toggle="tooltip"
+                    data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Add stock"
+                    style="cursor:pointer;">add</i>
+                </span>
+                <span data-bs-toggle="modal" data-bs-target="#pullItemModal">
+                    <i id="pull-${
+                    item.id
+                    }" class="ms-1 icon-btn icon material-icons pull-item" data-bs-toggle="tooltip"
+                        data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Pull item"
+                        style="cursor:pointer;">arrow_outward</i>
+                </span>
+            </td>
+        `;
+        tableBody.appendChild(row);
     });
     var tooltipTriggerList = [].slice.call(
         document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -653,3 +761,4 @@ async function fetchAndDisplayItems(searchQuery = "") {
     console.error("Error fetching items:", error);
   }
 }
+

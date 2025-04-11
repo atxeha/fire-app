@@ -19,31 +19,60 @@
 
     <link rel="stylesheet" href="./css/index.css">
 
-    <title>Production Office</title>
+    <title>BFP Camiguin</title>
 </head>
 
 <body>
-    <div class="container-fluid p-5 pt-4 mt-1">
+    <div class="container-fluid p-4 pt-2 mt-1">
         <div class="d-flex justify-content-between">
             <div>
-                <h4 class="text-center mb-4">Stock Inventory System</h4>
+                <h4 class="text-center mb-4 ps-5 ms-4">Equipment Inventory System</h4>
             </div>
 
             <div class="d-flex gap-3 search-input">
+                
+                <input name="searchItem" id="searchItem" type="search" class="search-box search-width form-control rounded-5 font me-4" placeholder="Search code or date">
+                
+            </div>
+        </div>
+        <div class="d-flex gap-4">
+            <div class="d-flex flex-column gap-2 pt-5 ps-1 pe-3">
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
                         style="cursor: pointer;"
-                        data-bs-placement="top"
+                        data-bs-placement="right"
                         data-bs-toggle="tooltip"
                         data-bs-custom-class="custom-tooltip"
                         title="Delete selected"
                         id="deleteSelected">delete</i>
                 </div>
                 <div>
+                    <span data-bs-toggle="modal" data-bs-target="#updateAccountModal">
+                        <i class="mt-1 material-icons icon icon-btn"
+                            style="cursor: pointer;"
+                            data-bs-placement="right"
+                            data-bs-toggle="tooltip"
+                            data-bs-custom-class="custom-tooltip"
+                            title="Update account"
+                            id="updateAccount">settings</i>
+                    </span>
+                </div>
+                <div>
+                    <span data-bs-toggle="modal" data-bs-target="#addFirefighterModal">
+                        <i class="mt-1 material-icons icon icon-btn"
+                            style="cursor: pointer; padding-left: 2px;"
+                            data-bs-placement="right"
+                            data-bs-toggle="tooltip"
+                            data-bs-custom-class="custom-tooltip"
+                            title="Add firefighter"
+                            id="addFirefighter">group_add</i>
+                    </span>
+                </div>
+                <div>
                     <span data-bs-toggle="modal" data-bs-target="#logModal">
                         <i class="mt-1 material-icons icon icon-btn"
                             style="cursor: pointer;"
-                            data-bs-placement="top"
+                            data-bs-placement="right"
                             data-bs-toggle="tooltip"
                             data-bs-custom-class="custom-tooltip"
                             title="Logs"
@@ -53,16 +82,7 @@
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
                         style="cursor: pointer;"
-                        data-bs-placement="top"
-                        data-bs-toggle="tooltip"
-                        data-bs-custom-class="custom-tooltip"
-                        title="Import data"
-                        id="importItem">arrow_downward</i>
-                </div>
-                <div>
-                    <i class="mt-1 material-icons icon icon-btn"
-                        style="cursor: pointer;"
-                        data-bs-placement="top"
+                        data-bs-placement="right"
                         data-bs-toggle="tooltip"
                         data-bs-custom-class="custom-tooltip"
                         title="Export data"
@@ -72,7 +92,7 @@
                     <span data-bs-toggle="modal" data-bs-target="#addItemModal">
                         <i class="mt-1 material-icons icon icon-btn"
                             style="cursor: pointer;"
-                            data-bs-placement="top"
+                            data-bs-placement="right"
                             data-bs-toggle="tooltip"
                             data-bs-custom-class="custom-tooltip"
                             title="New item"
@@ -82,7 +102,7 @@
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
                         style="cursor: pointer;"
-                        data-bs-placement="top"
+                        data-bs-placement="right"
                         data-bs-toggle="tooltip"
                         data-bs-custom-class="custom-tooltip"
                         title="Select item"
@@ -91,7 +111,7 @@
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
                         style="cursor: pointer;"
-                        data-bs-placement="top"
+                        data-bs-placement="right"
                         data-bs-toggle="tooltip"
                         data-bs-custom-class="custom-tooltip"
                         title="Select all"
@@ -99,26 +119,25 @@
                 </div>
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
-                        style="cursor: pointer;"
-                        data-bs-placement="top"
-                        data-bs-toggle="tooltip"
-                        data-bs-custom-class="custom-tooltip"
-                        title="Added items"
-                        id="viewAddedItem">zoom_in_map</i>
-                </div>
-                <div class="me-5">
-                    <i class="mt-1 material-icons icon icon-btn"
                     style="cursor: pointer;"
-                    data-bs-placement="top"
+                    data-bs-placement="right"
                     data-bs-toggle="tooltip"
                     data-bs-custom-class="custom-tooltip"        
                     title="Pulled items"
-                    id="viewPulledItem">zoom_out_map</i>
+                    id="viewPulledItem">arrow_outward</i>
                 </div>
-                <input name="searchItem" id="searchItem" type="search" class="search-box search-width form-control rounded-5 font me-4" placeholder="Search code or date">
+                <div>
+                    <i class="mt-1 material-icons icon icon-btn"
+                    style="cursor: pointer;"
+                    data-bs-placement="right"
+                    data-bs-toggle="tooltip"
+                    data-bs-custom-class="custom-tooltip"        
+                    title="Logout"
+                    id="logoutBtn">logout</i>
+                </div>
             </div>
-        </div>
-        <div class="table-container table-responsive">
+            
+            <div class="table-container table-responsive">
                 <table class="table font table-hover" id="inventoryTable">
                     <thead id="itemsTableHead">
                         <tr>
@@ -127,17 +146,21 @@
                             </th>
                             <th style="width: 5rem;">No.</th>
                             <th>Code</th>
-                            <th style="min-width: 18rem;">Item</th>
+                            <th style="min-width: 18rem;">Equipment</th>
                             <th>Stock</th>
                             <th>Unit</th>
-                            <th>Last Updated</th>
-                            <th  class="actions pe-4">Actions</th>
+                            <th>Added on</th>
+                            <th>Added by</th>
+                            <th style="width: 5rem;" class="ps-3">Status</th>
+                            <th class="actions pe-4">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="itemsTableBody">
                         
                     </tbody>
                 </table>
+            </div>
+            
         </div>
     </div>
     <!-- Pull Item Modal -->
@@ -155,7 +178,7 @@
                                 <thead>
                                     <tr style="font-size: .85rem !important;">
                                         <th>Code</th>
-                                        <th>Name</th>
+                                        <th>Equipment</th>
                                         <th>Stocks</th>
                                     </tr>
                                 </thead>
@@ -168,9 +191,7 @@
                                 </tboby>
                             </table>
                         </div>
-                        <input type="hidden" id="pullItemCode">
-                        <input type="hidden" id="pullItemName">
-                        <input type="hidden" id="pullUnit">
+                        <input type="hidden" id="pullEquipmentId">
                         <div class="row font mb-4">
                             <div class="input-field col-5">
                                 <label class="mb-2 ms-2" for="pullQuantity">Quantity</label>
@@ -184,16 +205,12 @@
                         <div class="row font mb-4">
                             <div class="input-field col-6">
                                 <label class="mb-2 ms-2" for="pullReleasedBy">Released By</label>
-                                <input type="text" id="pullReleasedBy" class="search-box form-control rounded-5 font" value="Vios R.">
+                                <input type="text" id="pullReleasedBy" class="search-box form-control rounded-5 font">
                             </div>
                             <div class="input-field col-6">
-                                <label class="mb-2 ms-2" for="pullReceivedBy">Received By</label>
-                                <input type="text" id="pullReceivedBy" class="search-box form-control rounded-5 font" list="datalist">
-                                <datalist id="datalist">
-                                    <option value="Deter L.">
-                                    <option value="Abao E.">
-                                    <option value="Timbal M.">
-                                </datalist>
+                                <label class="mb-2 ms-2" for="pullfireFighterId">Assigned to</label>
+                                <select type="text" id="pullfireFighterId" class="search-box form-select form-control rounded-5 font">
+                                </select>                                
                             </div>
                         </div>
                         <div class="modal-footer font">
@@ -215,25 +232,20 @@
                 <form method="post" id="addItemForm">
                     <div class="modal-body font p-4 pb-2">
                         <div class="row font mb-4">
-                            <div class="input-field col-4">
-                                <label class="mb-2 ms-2" for="addItemCode">Item Code</label>
-                                <input type="text" id="addItemCode" class="search-box form-control rounded-5 font">
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="equipmentCode">Equipment Code</label>
+                                <input type="text" id="equipmentCode" class="search-box form-control rounded-5 font">
                             </div>
-                            <div class="input-field col-6">
-                                <label class="mb-2 ms-2" for="addItemName">Item</label>
-                                <input type="text" id="addItemName" class="search-box form-control rounded-5 font">
-                            </div>
-                            <div class="input-field col-2">
-                                <label class="mb-2 ms-2" for="addQuantity">Quantity</label>
-                                <input type="number" id="addQuantity" class="search-box form-control rounded-5 font">
+                            <div class="input-field col-7">
+                                <label class="mb-2 ms-2" for="equipmentName">Equipment</label>
+                                <input type="text" id="equipmentName" class="search-box form-control rounded-5 font">
                             </div>
                         </div>
                 
                         <div class="row font mb-4">
-                            <div class="input-field col-3">
-                                <label class="mb-2 ms-2" for="addUnit">Unit</label>
-                                <select type="text" id="addUnit" class="form-select search-box form-control rounded-5 font">
-                                    <option value="ream">Ream</option>
+                            <div class="input-field col-4">
+                                <label class="mb-2 ms-2" for="unit">Unit</label>
+                                <select type="text" id="unit" class="form-select search-box form-control rounded-5 font">
                                     <option value="box">Box</option>
                                     <option value="cut">Cut</option>
                                     <option value="piece">Piece</option>
@@ -247,10 +259,10 @@
                             <div class="input-field col-4">
                                 <label class="mb-2 ms-2" for="addDate">Date <span class="text-muted" style="font-size: 0.8rem;">(Today)</span></label>
                                 <input type="datetime-local" id="addDate" class="search-box form-control rounded-5 font date" disabled>
-                            </div>
-                            <div class="input-field col-5">
-                                <label class="mb-2 ms-2" for="addedBy">Added By</label>
-                                <input type="text" id="addedBy" class="search-box form-control rounded-5 font" list="datalist">
+                            </div>  
+                            <div class="input-field col-4">
+                                <label class="mb-2 ms-2" for="quantity">Quantity</label>
+                                <input type="number" id="quantity" class="search-box form-control rounded-5 font">
                             </div>
                         </div>
                 
@@ -285,9 +297,9 @@
                                 </thead>
                                 <tboby>
                                     <tr>
-                                        <td id="newItemCode" class="p-2"></td>
-                                        <td id="newItemName" class="p-2"></td>
-                                        <td id="newItemStock" class="p-2"></td>
+                                        <td id="newEquipmentCode" class="p-2"></td>
+                                        <td id="newEquipmentName" class="p-2"></td>
+                                        <td id="newEquipmentStock" class="p-2"></td>
                                     </tr>
                                 </tboby>
                             </table>
@@ -306,12 +318,7 @@
                                     class="search-box form-control rounded-5 font date" disabled>
                             </div>
                         </div>
-                        <div class="row font mb-4">
-                            <div class="input-field col-12">
-                                <label class="mb-2 ms-2" for="newUpdatedBy">Updated By</label>
-                                <input type="text" id="newUpdatedBy" class="search-box form-control rounded-5 font" list="datalist">
-                            </div>
-                        </div>
+                            
                         <div class="modal-footer font">
                             <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Back</button>
                             <button class="btns secondary-btn rounded-5 font" type="submit">Add</button>
@@ -347,16 +354,16 @@
                     <h6 class="modal-title" id="editItemModalLabel">Edit Item Information</h6>
                 </div>
                 <form method="post" id="editItemForm">
-                    <input type="hidden" id="editItemId">
+                    <input type="hidden" id="editEquipmentId">
                     <div class="modal-body font p-4 pb-2">
                         <div class="row font mb-4">
                             <div class="input-field col-5">
-                                <label class="mb-2 ms-2" for="editItemCode">Item Code</label>
-                                <input type="text" id="editItemCode" class="search-box form-control rounded-5 font">
+                                <label class="mb-2 ms-2" for="editEquipmentCode">Equipment Code</label>
+                                <input type="text" id="editEquipmentCode" class="search-box form-control rounded-5 font">
                             </div>
                             <div class="input-field col-7">
-                                <label class="mb-2 ms-2" for="editItemName">Item</label>
-                                <input type="text" id="editItemName" class="search-box form-control rounded-5 font">
+                                <label class="mb-2 ms-2" for="editEquipmentName">Equipment</label>
+                                <input type="text" id="editEquipmentName" class="search-box form-control rounded-5 font">
                             </div>
                         </div>
             
@@ -364,10 +371,9 @@
                             <div class="input-field col-7">
                                 <label class="mb-2 ms-2" for="editUnit">Unit</label>
                                 <select type="text" id="editUnit" class="form-select search-box form-control rounded-5 font">
-                                    <option value="Ream">Ream</option>
                                     <option value="Box">Box</option>
                                     <option value="Cut">Cut</option>
-                                    <option value="Pcs">Pieces</option>
+                                    <option value="Piece">Piece</option>
                                     <option value="Set">Set</option>
                                     <option value="Bottle">Bottle</option>
                                     <option value="Roll">Roll</option>
@@ -375,8 +381,13 @@
                                 </select>
                             </div>
                             <div class="input-field col-5">
-                                <label class="mb-2 ms-2" for="editQuantity">Quantity</label>
-                                <input type="number" id="editQuantity" class="search-box form-control rounded-5 font date" readonly>
+                                <label class="mb-2 ms-2" for="editStatus">Status</label>
+                                <select type="text" id="editStatus" class="form-select search-box form-control rounded-5 font">
+                                    <option value="ACTIVE">ACTIVE</option>
+                                    <option value="IN_REPAIR">IN_REPAIR</option>
+                                    <option value="RETIRED">RETIRED</option>
+                                    <option value="LOST">LOST</option>
+                                </select>
                             </div>
                         </div>
             
@@ -401,14 +412,20 @@
                     <table class="table font" id="inventoryTable">
                         <thead class="thead" id="thead">
                             <tr>
-                                <th class="pb-2">Performed by</th>
-                                <th class="pb-2">Action</th>
-                                <th style="width: 10rem;" class="pb-2 d-flex justify-content-between">
+                                <th style="width: 12rem;">
+                                    <div class="d-flex pb-2">Performed by</div>
+                                </th>
+                                <th><div class="d-flex pb-2">Action</div></th>
+                                <th style="width: 10rem;">
+                                    <div class="d-flex justify-content-between p-0">
+                                        
                                     <span>Date</span>
                                     <span data-bs-toggle="modal" data-bs-target="#deleteAllLogModal">
-                                        <i class="dlt-icon icon-btn icon material-icons" data-bs-toggle="tooltip"
+                                        <i class="dlt-icon icon-btn icon material-icons me-2" data-bs-toggle="tooltip"
                                             data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Clear logs" id="dltIcon">delete_sweep</i>
                                     </span>
+                                    
+                                </div>
                                 </th>
                             </tr>
                         </thead>
@@ -439,6 +456,77 @@
             </div>
         </div>
     </div>
+    <!-- Add Fire Fighter Modal -->
+    <div class="modal" id="addFirefighterModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="1" aria-labelledby="addFirefighterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="addFirefighterModalLabel">Add New Fire Fighter</h6>
+                </div>
+                <form method="post" id="addFirefighterForm">
+                    <div class="modal-body font p-4 pb-2">
+                        <div class="row font mb-4">
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="employeeId">Employee ID</label>
+                                <input type="number" id="employeeId" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="name">Name <span class="text-muted" style="font-size: 0.8rem;">(First Middle Last)</span></label>
+                                <input type="text" id="name" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-2">
+                                <label class="mb-2 ms-2" for="gender">Gender</label>
+                                <select type="text" id="gender" class="search-box form-select form-control rounded-5 font">
+                                    <option value="MALE">MALE</option>
+                                    <option value="FEMALE">FEMALE</option>
+                                </select>
+                            </div>
+                        </div>
+                
+                        <div class="row font mb-4">
+                            <div class="input-field col-3">
+                                <label class="mb-2 ms-2" for="rank">Rank</label>
+                                <input type="text" id="rank" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-4">
+                                <label class="mb-2 ms-2" for="contactNumber">Contact Number</label>
+                                <input type="number" id="contactNumber" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="email">Email</label>
+                                <input type="text" id="email" class="search-box form-control rounded-5 font">
+                            </div>
+                        </div>
+                        <div class="row font mb-4">
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="address">Address</label>
+                                <input type="text" id="address" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-3">
+                                <label class="mb-2 ms-2" for="status">Status</label>
+                                <select type="text" id="status" class="search-box form-select form-control rounded-5 font">
+                                    <option value="ACTIVE">ACTIVE</option>
+                                    <option value="INACTIVE">INACTIVE</option>
+                                    <option value="RETIRED">RETIRED</option>
+                                    <option value="ON_LEAVE">ON_LEAVE</option>
+                                </select>
+                            </div>
+                            <div class="input-field col-4">
+                                <label class="mb-2 ms-2" for="addDates">Date <span class="text-muted" style="font-size: 0.8rem;">(Today)</span></label>
+                                <input type="datetime-local" id="addDates" class="search-box form-control rounded-5 font date" disabled>
+                            </div>
+                        </div>
+                
+                        <div class="modal-footer font">
+                            <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Discard</button>
+                            <button class="btns secondary-btn rounded-5 font" type="submit">Save</button>
+                        </div>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+     </div>
     <script src="./js/renderer.js"></script>
     <script src="./js/getLog.js"></script>
     <script src="./js/utils/defaultDate.js"></script>

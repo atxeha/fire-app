@@ -1,11 +1,9 @@
-import { execSync } from "child_process";
 import path from "path";
 import { app } from "electron";
-import fs from "fs";
-import { PrismaClient } from "@prisma/client";
-import internal from "stream";
-
-// const prisma = new PrismaClient();
+import fs, { stat } from "fs";
+import { PrismaClient} from "@prisma/client";
+import { EquipmentStatus } from "@prisma/client";
+import bcrypt from 'bcrypt';
 
 // Determine database path
 const isDev = !app.isPackaged; // Check if running in development
@@ -50,160 +48,123 @@ console.log("Prisma Client Path:", path.dirname(require.resolve("@prisma/client"
 
 export { prisma };
 
-export async function addItem(
-  item_code: string,
-  item_name: string,
+export async function addEquipment(
+  equipmentCode: string,
+  equipmentName: string,
   quantity: number,
   unit: string,
-  added_by: string,
-  date: Date
+  userId: string
 ) {
   // Check if the item_code already exists
-  const existingItem = await prisma.item.findUnique({
-    where: { item_code },
+  const existingItem = await prisma.equipment.findUnique({
+    where: { equipmentCode },
   });
 
   if (existingItem) {
     throw new Error(
-      `'${item_code}' already exists. Add quantity for the item instead.`
+      `'${equipmentCode}' already exists.`
     );
   }
 
   // Insert new item
-  const newItem = await prisma.item.create({
+  const newItem = await prisma.equipment.create({
     data: {
-      item_code,
-      item_name,
+      equipmentCode,
+      equipmentName,
       quantity,
       unit,
-      added_by,
-      date,
+      userId,
     },
   });
 
   return newItem;
 }
 
-export async function getItems() {
-  return await prisma.item.findMany({
+export async function getEquipmentList() {
+  return await prisma.equipment.findMany({
     orderBy: {
-      item_name: "asc",
+      equipmentName: "asc",
+  },
+  include: {
+    user: true,
   },
   });
 }
 
-export async function updateItemQuantity(
-  id: number,
-  new_quantity: number,
-  updated_by: string,
-  date: Date
+export async function updateEquipmentQuantity(
+    id: string,
+    new_quantity: number,
+) {
+    try {
+        return await prisma.$transaction(async (tx) => {
+
+            const newQuantity = Number(new_quantity)
+
+            const equipment = await tx.equipment.findUnique({
+                where: { id: id },
+            });
+
+            if (newQuantity < 0) {
+                return { success: false, message: "Quantity cannot be negative." };
+            }
+
+            await tx.equipment.update({
+                where: { id: id },
+                data: {
+                    quantity: { increment: newQuantity },
+                },
+            });
+
+            return { success: true, message: "Quantity updated.", equipment: equipment };
+        });
+    } catch (error) {
+        console.error(
+            "Error updating equipment quantity:",
+            (error as Error)?.message || "Unknown error"
+        );
+        return {
+            success: false,
+            message: (error as Error)?.message || "An unknown error occurred",
+        };
+    }
+}
+
+export async function editEquipment(
+  id: string,
+  equipmentCode: string,
+  equipmentName: string,
+  unit: string,
+  status: EquipmentStatus
 ) {
   try {
     return await prisma.$transaction(async (tx) => {
-      const itemId = Number(id);
-      const newQuantity = Number(new_quantity)
-      // Step 1: Check if the item exists
-      const item = await tx.item.findUnique({
-        where: { id: itemId },
-        // select: { quantity: true },
+      const item = await tx.equipment.findUnique({
+        where: { id: id },
       });
 
       if (!item) {
         return { success: false, message: "Item not found." };
       }
 
-      // Step 2: Prevent negative stock
-      if (newQuantity < 0) {
-        return { success: false, message: "Quantity cannot be negative." };
-      }
-
-      // Step 3: Update the quantity and `updated_by`
-      await tx.item.update({
-        where: { id: itemId },
-        data: {
-          quantity: {increment: newQuantity},
-          updated_by,
-          date,
-        },
-      });
-
-      return { success: true, message: "Quantity updated.", item: item };
-    });
-  } catch (error) {
-    console.error(
-      "Error updating item quantity:",
-      (error as Error)?.message || "Unknown error"
-    );
-    return {
-      success: false,
-      message: (error as Error)?.message || "An unknown error occurred",
-    };
-  }
-}
-
-export async function deleteItem(id: number) {
-  try {
-    const itemId = Number(id);
-
-    return await prisma.$transaction(async (tx) => {
-      const item = await tx.item.findUnique({
-        where: { id: itemId },
-      });
-
-      await tx.item.delete({
-        where: { id: itemId },
-      });
-
-      return { success: true, message: "Item deleted." };
-    });
-  } catch (error) {
-    console.error(
-      "Error deleting item:",
-      (error as Error)?.message || "Unknown error"
-    );
-    return {
-      success: false,
-      message: (error as Error)?.message || "An unknown error occurred",
-    };
-  }
-}
-
-export async function editItem(
-  id: number,
-  item_code: string,
-  item_name: string,
-  unit: string
-) {
-  try {
-    // Convert id to a number and validate it
-    const itemId = Number(id);
-
-    return await prisma.$transaction(async (tx) => {
-      const item = await tx.item.findUnique({
-        where: { id: itemId },
-      });
-
-      if (!item) {
-        return { success: false, message: "Item not found." };
-      }
-
-      if (item.item_code === item_code && item.item_name === item_name && item.unit === unit) {
+      if (item.equipmentCode === equipmentCode && item.equipmentName === equipmentName && item.unit === unit && item.status === status) {
         return {success: false, message: "No changes detected."}
       }
 
-      await tx.item.update({
-        where: { id: itemId },
+      const newItem = await tx.equipment.update({
+        where: { id: id },
         data: {
-          item_code,
-          item_name,
+          equipmentCode,
+          equipmentName,
           unit,
+          status,
         },
       });
 
       return {
         success: true,
         message: "Information updated.",
-        item: item,
+        equipment: item,
+        newEquipment: newItem,
       };
     });
   } catch (error) {
@@ -219,16 +180,13 @@ export async function editItem(
 }
 
 export async function addLog(
-    itemId: number,
-    user: string,
+    userId: string,
     log: string
 ) {
     try {
-        const id = Number(itemId)
         await prisma.log.create({
             data: {
-                itemId: id,
-                user,
+                userId,
                 log
             },
         })
@@ -243,7 +201,7 @@ export async function addLog(
 export async function getLog() {
     return await prisma.log.findMany({
         include: {
-            item: true,
+            user: true,
         },
         orderBy: {
           createdAt: "desc",
@@ -266,82 +224,39 @@ export async function deleteAllLogs() {
   }
 }
 
-export async function addAddedItem(
-    itemCode: string,
-    itemName: string,
-    addedQuantity: number,
-    unit: string,
-    addedBy: string
-) {
-    try {
-        const quantity = Number(addedQuantity)
-        await prisma.addedItem.create({
-            data: {
-                itemCode,
-                itemName,
-                addedQuantity: quantity,
-                unit,
-                addedBy,
-            },
-        })
-        console.log("Added item recorded.")
-        return {success:true, message: "Item recorded."}
-    } catch (error) {
-        console.log(`Error saving item: ${error}`)
-        return { success: false, message: (error as Error).message}
-    }
-}
-
-export async function getAddedItems() {
-    try {
-        return await prisma.addedItem.findMany({
-          orderBy: {
-            addedDate: "desc",
-        },
-        });
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-
-export async function pullItem(
-    itemCode: string,
-    itemName: string,
-    releasedQuantity: number,
-    unit: string,
+export async function pullEquipment(
+    equipmentId: string,
+    fireFighterId: string,
     releasedBy: string,
-    receivedBy: string
+    quantity: number
 ): Promise<{ success: boolean; message: string; item?: object }> {
     try {
         return await prisma.$transaction(async (tx) => {
 
-            const item = await tx.item.findUnique({
-                where: { item_code: itemCode },
+            const item = await tx.equipment.findUnique({
+                where: { id: equipmentId },
             });
 
             if (!item) {
                 throw new Error("Item not found.");
             }
-            if (item.quantity < releasedQuantity) {
+            if (item.quantity < quantity) {
                 throw new Error("Not enough stock available.");
             }
 
-            await tx.pulledItem.create({
+            await tx.equipmentLog.create({
                 data: {
-                    itemCode,
-                    itemName,
-                    releasedQuantity,
-                    unit,
-                    releasedBy,
-                    receivedBy,
+                  equipmentId,
+                  fireFighterId,
+                  releasedBy,
+                  quantity,
                 },
             });
 
-            await tx.item.update({
-                where: { item_code: itemCode },
+            await tx.equipment.update({
+                where: { id: equipmentId },
                 data: {
-                    quantity: { decrement: releasedQuantity },
+                    quantity: { decrement: quantity },
                 },
             });
 
@@ -360,35 +275,73 @@ export async function pullItem(
 }
 
 
-export async function getPullItems() {
+// export async function getPullItems() {
+//   try {
+//     return await prisma.pulledItem.findMany({
+//       orderBy: {
+//         releasedDate: "desc",
+//     },
+//     });
+//   } catch (error) {
+//     console.log(error)
+//   }
+// }
+
+export async function autoAccountCreate() {
+  const username = "admin";
+  const name = "admin";
+  const isStaff = true;
+  const isActive = true;
+  const password = "admin1234";
   try {
-    return await prisma.pulledItem.findMany({
-      orderBy: {
-        releasedDate: "desc",
-    },
+    const existingUser = await prisma.user.findUnique({
+      where: { username },
     });
+
+    if (!existingUser) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+  
+      await prisma.user.create({
+        data: {
+          username,
+          name,
+          password: hashedPassword,
+          isStaff: isStaff,
+          isActive: isActive,
+        },
+      });
+    } else {
+      return;
+    }
+    console.log("User created successfully:");
+    return;
   } catch (error) {
-    console.log(error)
+    console.error("Error creating account:", error);
+    throw error;
   }
 }
 
-export async function deleteItemFromTable(id: string, table: "PulledItem" | "AddedItem") {
-    try {
-        return await prisma.$transaction(async (tx) => {
-            if (table === "PulledItem") {
-                await tx.pulledItem.delete({ where: { id } });
-            } else {
-                await tx.addedItem.delete({ where: { id } });
-            }
-            console.log(`${table} item with ID ${id} deleted.`);
-            return { success: true, message: `${table} deleted.` };
-        });
-    } catch (error) {
-        console.error(`Error deleting item from ${table}:`, (error as Error)?.message || "Unknown error");
-        return {
-            success: false,
-            message: (error as Error)?.message || "An unknown error occurred",
-        };
-    }
-}
+export async function checkLogin(username: string, password: string) {
+  try {
+    // Find user by username
+    const user = await prisma.user.findUnique({
+      where: { username },
+    });
 
+    // If user not found
+    if (!user) {
+      return { success: false, message: 'Invalid username or password.' };
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return { success: false, message: 'Invalid username or password.' };
+    }
+
+    return { success: true, message: 'Login successful', user: user};
+  } catch (error) {
+    console.error('Login Error:', error);
+    return { success: false, message: 'Internal server error' };
+  }
+}

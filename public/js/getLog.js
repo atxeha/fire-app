@@ -19,7 +19,7 @@ async function displayLogs(searchQuery = "") {
         tableBody.innerHTML = "";
 
         const filteredLogs = logs.filter(log => {
-            const logCodeMatch = log.user.toLowerCase().includes(searchQuery.toLowerCase());
+            const logCodeMatch = log.user.name.toLowerCase().includes(searchQuery.toLowerCase());
 
             const logDate = new Date(log.createdAt)
                 .toLocaleString("en-US", {
@@ -42,7 +42,7 @@ async function displayLogs(searchQuery = "") {
             return logCodeMatch || dateMatch;
         });
 
-        const dltIcon = document.getElementById("dltIcon");
+        // const dltIcon = document.getElementById("dltIcon");
 
         if (filteredLogs.length === 0) {
             tableHead.innerHTML = "";
@@ -51,10 +51,10 @@ async function displayLogs(searchQuery = "") {
                 <td colspan="3" class="text-center text-muted p-3">No history log</td>
                 </tr>
             `;
-            dltIcon.style.display = "none";
+            // dltIcon.style.display = "none";
             return;
         } else {
-            dltIcon.style.display = "inline-block";
+            // dltIcon.style.display = "inline-block";
         }
 
         filteredLogs.forEach((log, index) => {
@@ -78,8 +78,10 @@ async function displayLogs(searchQuery = "") {
                 .replace(",", " --");
 
             row.innerHTML = `
-                <td>@${log.user}</td>
-                <td>${log.log} <span class="log-item">(${log.item.item_code} ${log.item.item_name})</span></td>
+                <td>@${log.user.name}</td>
+                <td class="pb-2">
+                        ${log.log}
+                </td>
                 <td style="width: 10rem;">${formattedDate}</td>
             `;
             tableBody.appendChild(row);

@@ -1,9 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
   const addItemDate = document.getElementById("addDate");
+  const addItemDates = document.getElementById("addDates");
   const pullItemDate = document.getElementById("pullDate");
   const updateItemDate = document.getElementById("newQuantityDate");
 
-  if (addItemDate && pullItemDate && updateItemDate) {
+  if (addItemDate && pullItemDate && updateItemDate && addItemDates) {
     const now = new Date();
 
     // Convert to GMT+8 (Manila Time)
@@ -13,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const formattedDateTime = now.toISOString().slice(0, 16);
 
     addItemDate.value = formattedDateTime;
+    addItemDates.value = formattedDateTime;
     pullItemDate.value = formattedDateTime;
     updateItemDate.value = formattedDateTime;
   }
