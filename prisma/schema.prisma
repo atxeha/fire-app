@@ -29,11 +29,11 @@ model User {
 
 model Firefighter {
   id            String            @id @default(cuid())
-  employeeId    Int @unique
+  employeeId    BigInt @unique
   name          String
   gender        String
   rank          String
-  contactNumber Int
+  contactNumber BigInt
   email         String?
   status        FirefighterStatus @default(ACTIVE)
   address       String

@@ -28,11 +28,8 @@
             <div>
                 <h4 class="text-center mb-4 ps-5 ms-4">Equipment Inventory System</h4>
             </div>
-
             <div class="d-flex gap-3 search-input">
-                
                 <input name="searchItem" id="searchItem" type="search" class="search-box search-width form-control rounded-5 font me-4" placeholder="Search code or date">
-                
             </div>
         </div>
         <div class="d-flex gap-4">
@@ -95,7 +92,7 @@
                             data-bs-placement="right"
                             data-bs-toggle="tooltip"
                             data-bs-custom-class="custom-tooltip"
-                            title="New item"
+                            title="New equipment"
                             id="addItem">add</i>
                     </span>
                 </div>
@@ -123,7 +120,7 @@
                     data-bs-placement="right"
                     data-bs-toggle="tooltip"
                     data-bs-custom-class="custom-tooltip"        
-                    title="Pulled items"
+                    title="In use equipments"
                     id="viewPulledItem">arrow_outward</i>
                 </div>
                 <div>
@@ -146,7 +143,7 @@
                             </th>
                             <th style="width: 5rem;">No.</th>
                             <th>Code</th>
-                            <th style="min-width: 18rem;">Equipment</th>
+                            <th style="min-width: 15rem;">Equipment</th>
                             <th>Stock</th>
                             <th>Unit</th>
                             <th>Added on</th>
@@ -169,7 +166,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h6 class="modal-title" id="pullItemModalLabel">Pull/Withdraw Item</h6>
+                    <h6 class="modal-title" id="pullItemModalLabel">Use/Withdraw Item</h6>
                 </div>
                 <form method="post" id="pullItemForm">
                     <div class="modal-body font p-4 pt-0 pb-2">
@@ -517,9 +514,13 @@
                             </div>
                         </div>
                 
-                        <div class="modal-footer font">
-                            <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Discard</button>
-                            <button class="btns secondary-btn rounded-5 font" type="submit">Save</button>
+                        <div class="modal-footer font d-flex justify-content-between">
+                                <button type="button" class="btn btn-link btn-link-green font p-0 me-3" id="viewFirefighter">View</button>
+                                <div>
+                                    <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Discard</button>
+                                    <button class="btns secondary-btn rounded-5 font" type="submit">Save</button>
+
+                                </div>
                         </div>
                     </div>
                 </form>

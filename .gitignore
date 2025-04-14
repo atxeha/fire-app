@@ -34,9 +34,9 @@ Thumbs.db
 /.vscode/
 
 # SQLite database (if used)
-db/inventory.db
-db/*.sqlite
-db/*.sqlite3
+# db/inventory.db
+# db/*.sqlite
+# db/*.sqlite3
 
 # Electron Forge & Electron Builder output
 forge.config.js

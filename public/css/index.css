@@ -135,7 +135,14 @@ td, th {
     transition: all 0.1s ease-in;
 }
 .btn-link:hover {
-    color: #7c1717;
+    color: #9e3434;
+}
+
+.btn-link-green {
+    color: #388E3C !important;
+}
+.btn-link-green:hover {
+    color: #144617 !important;
 }
 
 .search-icon {

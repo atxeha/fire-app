@@ -24,16 +24,30 @@
 </head>
 
 <body>
-    <div class="container-fluid p-5 pt-4 mt-1">
+    <div class="container-fluid p-4 pt-2 mt-1">
         <div class="d-flex justify-content-between">
-            <div class="d-flex">
+            <div class="d-flex ps-1">
                 <div style="padding-top: 3px; cursor: pointer;">
                     <i class="icon-btn icon material-icons"
                         id="backBtn">chevron_left</i>
                 </div>
-                <h4 class="text-center mb-4 ms-2">Pulled Item List</h4>
+                <h4 class="text-center mb-4 ms-2">In Use Equipments</h4>
             </div>
             <div class="d-flex gap-3 search-input">
+                <input type="search" class="search-box search-width form-control rounded-5 font me-4" id="searchPulledItem" placeholder="Search code or date">
+            </div>
+        </div>
+        <div class="d-flex gap-4">
+            <div class="d-flex flex-column gap-2 pt-5 ps-1 pe-3">
+                <div>
+                    <i class="mt-1 material-icons icon icon-btn"
+                        style="cursor: pointer;"
+                        data-bs-placement="top"
+                        data-bs-toggle="tooltip"
+                        data-bs-custom-class="custom-tooltip"
+                        title="Delete selected"
+                        id="deleteSelected">delete</i>
+                </div>
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
                         style="cursor: pointer;"
@@ -42,6 +56,15 @@
                         data-bs-custom-class="custom-tooltip"
                         title="Export data"
                         id="exportItem">arrow_upward</i>
+                </div>
+                <div>
+                    <i class="mt-1 material-icons icon icon-btn"
+                        style="cursor: pointer;"
+                        data-bs-placement="top"
+                        data-bs-toggle="tooltip"
+                        data-bs-custom-class="custom-tooltip"
+                        title="Return selected"
+                        id="returnItem">keyboard_return</i>
                 </div>
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
@@ -61,41 +84,30 @@
                         title="Select all"
                         id="selectAllItem">done_all</i>
                 </div>
-                <div class="me-5">
-                    <i class="mt-1 material-icons icon icon-btn"
-                        style="cursor: pointer;"
-                        data-bs-placement="top"
-                        data-bs-toggle="tooltip"
-                        data-bs-custom-class="custom-tooltip"
-                        title="Delete selected"
-                        id="deleteSelected">delete</i>
-                </div>
-                <input type="search" class="search-box search-width form-control rounded-5 font me-4" id="searchPulledItem" placeholder="Search code or date">
-                    
             </div>
-        </div>
-        <div class="table-container table-responsive">
-                <table class="table font table-hover" id="pulledTable">
-                    <thead id="pulledTableHead">
-                        <tr>
-                            <th id="checkboxColumn" style="width: 3rem; display: none;">
-                                <input type="checkbox" id="selectAllCheckbox">
-                            </th>
-                            <th>No.</th>
-                            <th>Code</th>
-                            <th style="min-width: 18rem;">Item</th>
-                            <th>QTY</th>
-                            <th>Unit</th>
-                            <th>Released by</th>
-                            <th>Received by</th>
-                            <th style="width: 12rem;">Date</th>
-                            <th style="width: 4rem;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pulledTableBody">
-
-                    </tbody>
-                </table>
+            <div class="table-container table-responsive">
+                    <table class="table font table-hover" id="pulledTable">
+                        <thead id="pulledTableHead">
+                            <tr>
+                                <th id="checkboxColumn" style="width: 3rem; display: none;">
+                                    <input type="checkbox" id="selectAllCheckbox">
+                                </th>
+                                <th>No.</th>
+                                <th>Code</th>
+                                <th style="min-width: 18rem;">Item</th>
+                                <th>QTY</th>
+                                <th>Unit</th>
+                                <th>Released by</th>
+                                <th>Assigned to</th>
+                                <th style="width: 12rem;">Date</th>
+                                <th style="width: 4rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pulledTableBody">
+    
+                        </tbody>
+                    </table>
+            </div>
         </div>
     </div>
     <!-- Delete Item Modal -->

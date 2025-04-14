@@ -5,7 +5,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   addEquipment: (data: any) => ipcRenderer.invoke("add-equipment", data),
   getEquipmentList: () => ipcRenderer.invoke("get-equipment-list"),
   pullEquipment: (data: any) => ipcRenderer.invoke("pull-equipment", data),
-  // getPullItems: (data: any) => ipcRenderer.invoke("get-pull-items", data),
+  getEquipmentLog: () => ipcRenderer.invoke("get-equipment-log"),
   showToast: (message: string, success: boolean) => {
     window.postMessage({ type: "show-toast", message, success });
   },
@@ -23,5 +23,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   logout: (username: string) => ipcRenderer.invoke("logout", username),
   addFirefighter: (data: any) => ipcRenderer.invoke('add-firefighter', data),
   getFirefighters: () => ipcRenderer.invoke("get-firefighters"),
+  getFirefighterList: () => ipcRenderer.invoke("get-firefighter-list"),
 });
 

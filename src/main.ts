@@ -12,7 +12,8 @@ import {
   autoAccountCreate,
   getEquipmentList,
   addEquipment,
-  editEquipment
+  editEquipment,
+  getEquipmentLog
 } from "./database";
 import { execSync } from "child_process";
 import * as XLSX from "xlsx";
@@ -64,59 +65,7 @@ app.whenReady().then(() => {
 
 const menu = Menu.buildFromTemplate([
   {
-    label: "File",
-    submenu: [
-      {
-        label: "Import",
-        click: () => {
-          console.log("Import clicked!");
-        },
-      },
-      {
-        label: "Export",
-        click: () => {
-          console.log("Export clicked!");
-        },
-      },
-      { type: "separator" },
-      {
-        label: "New Stock",
-        click: () => {
-          console.log("New stock clicked!");
-        },
-      },
-      {
-        label: "View Pulled Items",
-        click: () => {
-          console.log("View pulled Items clicked!");
-        },
-      },
-      {
-        label: "View Added Items",
-        click: () => {
-          console.log("View Added Items clicked!");
-        },
-      },
-      { type: "separator" },
-      {
-        label: "Exit",
-        role: "quit",
-      },
-    ],
-  },
-  {
-    label: "Edit",
-    submenu: [
-      { label: "Undo", role: "undo" },
-      { label: "Redo", role: "redo" },
-      { type: "separator" },
-      { label: "Cut", role: "cut" },
-      { label: "Copy", role: "copy" },
-      { label: "Paste", role: "paste" },
-    ],
-  },
-  {
-    label: "View",
+    label: "About",
     submenu: [
       {
         label: "Reload",
@@ -126,25 +75,14 @@ const menu = Menu.buildFromTemplate([
         label: "Toggle DevTools",
         role: "toggleDevTools",
       },
-    ],
-  },
-  {
-    label: "Help",
-    submenu: [
       {
         label: "Developer",
         click: () => {
           shell.openExternal("https://www.facebook.com/a1yag/");
         },
       },
-      {
-        label: "About",
-        click: () => {
-          console.log("About clicked!");
-        },
-      },
     ],
-  },
+  }
 ]);
 
 ipcMain.handle("add-equipment", async (event, equipmentData) => {
@@ -209,14 +147,14 @@ ipcMain.handle("get-equipment-list", async () => {
   }
 });
 
-// ipcMain.handle("get-pull-items", async () => {
-//   try {
-//     return getPullItems();
-//   } catch (error) {
-//     console.error("Error fetching pulled items.", error);
-//     return [];
-//   }
-// });
+ipcMain.handle("get-equipment-log", async () => {
+  try {
+    return getEquipmentLog();
+  } catch (error) {
+    console.error("Error fetching pulled equipments.", error);
+    return [];
+  }
+});
 
 ipcMain.handle("update-equipment-quantity", async (event, newQuantityData) => {
   const { id, new_quantity} = newQuantityData;
@@ -259,7 +197,7 @@ app.on("window-all-closed", () => {
 
 ipcMain.handle("export-items", async (event, { tableName, selectedIds }: { tableName: string, selectedIds: string[] }) => {
     try {
-        const validTables = ["equipment", "pulledItem", "log", "addedItem"];
+        const validTables = ["equipment", "pulledItem", "equipmentLog", "addedItem"];
         if (!validTables.includes(tableName)) {
             return { success: false, message: `Invalid table: ${tableName}` };
         }
@@ -420,4 +358,17 @@ ipcMain.handle("get-firefighters", async () => {
       return { success: false, message: (error as Error).message };
     }
   });
+
+ipcMain.handle("get-firefighter-list", async () => {
+  try {
+    const firefighters = await prisma.firefighter.findMany({
+      include: {
+        equipmentLog: true,
+      },
+    })
+    return firefighters;
+  } catch (err) {
+    console.error("Error fetching firefighters:", err);
+  }
+})
   

@@ -275,17 +275,21 @@ export async function pullEquipment(
 }
 
 
-// export async function getPullItems() {
-//   try {
-//     return await prisma.pulledItem.findMany({
-//       orderBy: {
-//         releasedDate: "desc",
-//     },
-//     });
-//   } catch (error) {
-//     console.log(error)
-//   }
-// }
+export async function getEquipmentLog() {
+  try {
+    return await prisma.equipmentLog.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        equipment: true,
+        fireFighter: true,
+      }
+    });
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 export async function autoAccountCreate() {
   const username = "admin";
@@ -345,3 +349,4 @@ export async function checkLogin(username: string, password: string) {
     return { success: false, message: 'Internal server error' };
   }
 }
+

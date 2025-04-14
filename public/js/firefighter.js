@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     return;
                 }
         
-                const tableName = "addedItem";
+                const tableName = "firefighter";
                 const response = await window.electronAPI.deleteSelectedItems(tableName, selectedIds);
         
                 document.getElementById("checkboxColumn").style.display = "none";
@@ -171,11 +171,11 @@ document.getElementById("searchPulledItem").addEventListener("input", (event) =>
 
 async function fetchAndDisplayItems(searchQuery = "") {
     try {
-        items = await window.electronAPI.getAddedItems();
+        items = await window.electronAPI.getFirefighterList();
 
-        const addedItemTable = document.getElementById("addedItemTable");
-        const tableHead = document.getElementById("tableHead");
-        const tableBody = document.getElementById("pulledItemTable");
+        const addedItemTable = document.getElementById("fighterTable");
+        const tableHead = document.getElementById("fighterTableHead");
+        const tableBody = document.getElementById("fighterTableBody");
 
         if (!tableBody) {
             console.error("Error: Table body element not found!");
@@ -184,26 +184,8 @@ async function fetchAndDisplayItems(searchQuery = "") {
         tableBody.innerHTML = "";
 
         const filteredItems = items.filter(item => {
-            const itemCodeMatch = item.itemCode.toLowerCase().includes(searchQuery.toLowerCase());
-            const itemDate = new Date(item.addedDate)
-                .toLocaleString("en-US", {
-                timeZone: "Asia/Manila",
-                year: "2-digit",
-                month: "numeric",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-                hourCycle: "h12",
-            })
-            .replace("AM", "am")
-            .replace("PM", "pm")
-            .replace("/", "-")
-            .replace("/", "-")
-            .replace(",", " --");
-
-            const dateMatch = itemDate.includes(searchQuery);
-
-            return itemCodeMatch || dateMatch;
+            const itemCodeMatch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+            return itemCodeMatch;
         });
 
         if (filteredItems.length === 0) {
@@ -211,41 +193,38 @@ async function fetchAndDisplayItems(searchQuery = "") {
             tableHead.style.display = "none";
             tableBody.innerHTML = `
                 <tr>
-                <td colspan="9" class="text-center text-muted p-3 pt-4"><h6>No item found</h6></td>
+                <td colspan="9" class="text-center text-muted p-3 pt-4"><h6>No firefighter found</h6></td>
                 </tr>
             `;
             return;
         }
 
         filteredItems.forEach((item, index) => {
+
+            function itemStatus(status) {
+                const colorMap = {
+                    ACTIVE: "#5ac072",
+                    INACTIVE: "#db5a67", 
+                    RETIRED: "#6c757d",
+                    ON_LEAVE: "#ff9e4e",
+                };
+                return `background-color: ${colorMap[status] || "#000"}; color:#ffffff;`;
+            }
+
             const row = document.createElement("tr");
-            const formattedDate = new Date(item.addedDate)
-                .toLocaleString("en-US", {
-                    timeZone: "Asia/Manila",
-                    year: "2-digit",
-                    month: "numeric",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                    hourCycle: "h12",
-                })
-                .replace("AM", "am")
-                .replace("PM", "pm")
-                .replace("/", "-")
-                .replace("/", "-")
-                .replace(",", " --");
 
             row.innerHTML = `
                 <td class="checkboxCell" style="display: none;">
                         <input id="checkbox" type="checkbox" class="rowCheckbox" data-id="${item.id}">
                 </td>
                 <td>${index + 1}</td>
-                <td>${item.itemCode}</td>
-                <td>${item.itemName}</td>
-                <td>${item.addedQuantity}</td>
-                <td>${item.unit}</td>
-                <td>${item.addedBy}</td>
-                <td>${formattedDate}</td>
+                <td>${item.employeeId}</td>
+                <td>${item.rank}</td>
+                <td>${item.name}</td>
+                <td>${item.gender}</td>
+                <td>${item.email}</td>
+                <td>${item.contactNumber}</td>
+                <td><span class="badge d-flex justify-content-center" style="${itemStatus(item.status)}">${item.status}</span></td>
                 <td>
                     <i class="edit-icon icon-btn icon material-icons ms-3" data-bs-toggle="tooltip"
                         data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Edit">edit</i>

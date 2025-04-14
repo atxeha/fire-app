@@ -25,11 +25,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const addItemForm = document.getElementById("addItemForm");
     const addFirefighterForm = document.getElementById("addFirefighterForm")
     const viewPulledItem = document.getElementById("viewPulledItem");
-    const viewAddedItem = document.getElementById("viewAddedItem")
     const pullItemForm = document.getElementById("pullItemForm");
     const newQuantityItemForm = document.getElementById("newQuantityItemForm");
     const deleteItemForm = document.getElementById("deleteItemForm");
     const editItemForm = document.getElementById("editItemForm");
+    const viewFirefighter = document.getElementById("viewFirefighter");
     const deleteItemModal = new bootstrap.Modal(document.getElementById("deleteItemModal"));
     const addItemModal = new bootstrap.Modal(document.getElementById("addItemModal"));
     const pullItemModal = new bootstrap.Modal(document.getElementById("pullItemModal"));
@@ -233,11 +233,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         } 
         
-        if (viewAddedItem) {
-            viewAddedItem.addEventListener("click", (event) => {
+        if (viewFirefighter) {
+            viewFirefighter.addEventListener("click", (event) => {
                 event.preventDefault();
-                console.log("asdasds")
-                window.electronAPI.navigate("addedItem.html")
+                window.electronAPI.navigate("firefighter.html")
             })
         }
 
@@ -359,23 +358,23 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const releasedBy = capitalizeWords(document.getElementById("pullReleasedBy").value.trim());
                 const quantity = parseInt(document.getElementById("pullQuantity").value.trim() || "0", 10);
 
-                console.log(itemCode, itemName, unit, quantity, releasedBy, receivedBy)
+                console.log(equipmentId, releasedBy, quantity, fireFighterId)
 
-                if (!itemCode || !releasedBy || !quantity || !receivedBy) {
+                if (!equipmentId || !releasedBy || !quantity || !fireFighterId) {
                     window.electronAPI.showToast("All fields are required.", false);
                     return;
                 }
 
                 const pullData = {
-                    itemCode: itemCode,
-                    itemName: itemName,
-                    releasedQuantity: Number(quantity),
-                    unit: unit,
+                    equipmentId: equipmentId,
+                    fireFighterId: fireFighterId,
                     releasedBy: releasedBy,
+                    quantity: quantity,
                 };
 
                 try {
-                    const response = await window.electronAPI.pullItem(pullData);
+                    const response = await window.electronAPI.pullEquipment(pullData);
+                    console.log(response)
 
                 if (response.success) {
                     window.electronAPI.showToast(response.message, true);
@@ -385,9 +384,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     fetchAndDisplayItems(searchQuery);
 
                     const logData = {
-                        itemId: response.item.item.id,
-                        user: receivedBy,
-                        log: quantity === 1 ? `Pulled ${quantity} ${unit.toLowerCase()} of item` : `Pulled ${quantity} ${unit.toLowerCase()}s of item`
+                        userId: user.id,
+                        log: `Pulled an equipment: ${quantity} ${quantity > 1 ? `${response.item.item.unit}s` : `${response.item.item.unit}`} of (${response.item.item.equipmentName})`
                     }
                     try {
                         window.electronAPI.addLog(logData);
@@ -588,9 +586,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("itemStock").textContent = selectedItem.quantity;
 
         document.getElementById("pullReleasedBy").value = user.name
-        document.getElementById("pullItemCode").value = selectedItem.equipmentCode;
-        document.getElementById("pullItemName").value = selectedItem.equipmentName;
-        document.getElementById("pullUnit").value = selectedItem.unit;
+        document.getElementById("pullEquipmentId").value = selectedItem.id;
       }
     }
   });
@@ -743,7 +739,7 @@ async function fetchAndDisplayItems(searchQuery = "") {
                     <i id="pull-${
                     item.id
                     }" class="ms-1 icon-btn icon material-icons pull-item" data-bs-toggle="tooltip"
-                        data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Pull item"
+                        data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Use item"
                         style="cursor:pointer;">arrow_outward</i>
                 </span>
             </td>

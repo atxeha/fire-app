@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 window.electronAPI.showToast("No items selected.", false);
                 return;
             }
-            const tableName = "pulledItem";
+            const tableName = "equipmentLog";
             const response = await window.electronAPI.exportItems({ tableName, selectedIds });
 
             window.electronAPI.showToast(response.message, response.success);
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     return;
                 }
         
-                const tableName = "pulledItem";
+                const tableName = "equipmentLog";
                 const response = await window.electronAPI.deleteSelectedItems(tableName, selectedIds);
         
                 document.getElementById("checkboxColumn").style.display = "none";
@@ -166,7 +166,9 @@ document.getElementById("searchPulledItem").addEventListener("input", (event) =>
 
 async function fetchAndDisplayItems(searchQuery = "") {
     try {
-        items = await window.electronAPI.getPullItems();
+        items = await window.electronAPI.getEquipmentLog();
+
+        console.log(items)
 
         const tableBody = document.getElementById("pulledTableBody");
         const tableHead = document.getElementById("pulledTableHead");
@@ -175,9 +177,9 @@ async function fetchAndDisplayItems(searchQuery = "") {
         tableBody.innerHTML = "";
 
         const filteredItems = items.filter(item => {
-            const itemCodeMatch = item.itemCode.toLowerCase().includes(searchQuery.toLowerCase());
+            const itemCodeMatch = item.equipment.equipmentCode.toLowerCase().includes(searchQuery.toLowerCase());
 
-            const itemDate = new Date(item.releasedDate)
+            const itemDate = new Date(item.createdAt)
                 .toLocaleString("en-US", {
                 timeZone: "Asia/Manila",
                 year: "2-digit",
@@ -202,7 +204,7 @@ async function fetchAndDisplayItems(searchQuery = "") {
             tableHead.style.display = "none";
             tableBody.innerHTML = `
                 <tr>
-                <td colspan="9" class="text-center text-muted p-3 pt-4"><h6>No item found</h6></td>
+                <td colspan="9" class="text-center text-muted p-3 pt-4"><h6>No equipment found</h6></td>
                 </tr>
             `;
             return;
@@ -211,7 +213,7 @@ async function fetchAndDisplayItems(searchQuery = "") {
         filteredItems.forEach((item, index) => {
             const row = document.createElement("tr");
 
-            const formattedDate = new Date(item.releasedDate)
+            const formattedDate = new Date(item.createdAt)
                 .toLocaleString("en-US", {
                     timeZone: "Asia/Manila",
                     year: "2-digit",
@@ -232,16 +234,16 @@ async function fetchAndDisplayItems(searchQuery = "") {
                     <input id="checkbox" type="checkbox" class="rowCheckbox" data-id="${item.id}">
                 </td>
                 <td>${index + 1}</td>
-                <td>${item.itemCode}</td>
-                <td>${item.itemName}</td>
-                <td>${item.releasedQuantity}</td>
-                <td>${item.unit}</td>
+                <td>${item.equipment.equipmentCode}</td>
+                <td>${item.equipment.equipmentName}</td>
+                <td>${item.quantity}</td>
+                <td>${item.equipment.unit}</td>
                 <td>${item.releasedBy}</td>
-                <td>${item.receivedBy}</td>
+                <td>${item.fireFighter.name}</td>
                 <td>${formattedDate}</td>
                 <td>
-                    <i class="edit-icon icon-btn icon material-icons ms-3" data-bs-toggle="tooltip"
-                        data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Edit">edit</i>
+                    <i class="icon-btn icon material-icons ms-3" data-bs-toggle="tooltip"
+                        data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Return equipment" style="cursor: pointer;">keyboard_return</i>
                 </td>
             `;
             tableBody.appendChild(row);
