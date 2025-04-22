@@ -26,5 +26,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   addFirefighter: (data: any) => ipcRenderer.invoke('add-firefighter', data),
   getFirefighters: () => ipcRenderer.invoke("get-firefighters"),
   getFirefighterList: () => ipcRenderer.invoke("get-firefighter-list"),
+  editFirefighter: (firefighterData: any) => ipcRenderer.invoke("edit-firefighter", firefighterData),
 });
 

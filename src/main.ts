@@ -57,6 +57,7 @@ app.whenReady().then(() => {
   });
 
   mainWindow.loadFile(path.join(app.getAppPath(), "public", "login.html"));
+  mainWindow.maximize();
 
   autoAccountCreate()
     .then(() => console.log("Account created successfully"))
@@ -383,3 +384,26 @@ ipcMain.handle("get-firefighter-list", async () => {
   }
 })
   
+ipcMain.handle("edit-firefighter", async (_event, firefighterData) => {
+  const { id, employeeId, name, gender, rank, contactNumber, email, status, address } = firefighterData;
+
+  try {
+      const updatedFirefighter = await prisma.firefighter.update({
+          where: { id },
+          data: {
+              employeeId,
+              name,
+              gender,
+              rank,
+              contactNumber: BigInt(contactNumber),
+              email,
+              status,
+              address,
+          },
+      });
+
+      return { success: true, message: "Information updated.", data: updatedFirefighter };
+  } catch (error) {
+      return { success: false, message: (error as Error).message };
+  }
+});

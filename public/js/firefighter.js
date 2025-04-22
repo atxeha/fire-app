@@ -1,5 +1,13 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
+    function capitalizeWords(str) {
+        return str
+            .toLowerCase()
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+    }
+
     let searchQuery = "";
 
     fetchAndDisplayItems(searchQuery);
@@ -11,7 +19,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const deleteItemModal = new bootstrap.Modal(document.getElementById("deleteItemModal"));
     const selectAllIcon = document.getElementById("selectAllItem");
     const selectItemIcon = document.getElementById("selectItem");
-    const deleteSelectedBtn = document.getElementById("deleteSelected")
+    const deleteSelectedBtn = document.getElementById("deleteSelected");
+    const editFirefighterForm = document.getElementById("editFirefighterForm");
+    const editFirefighterModal = new bootstrap.Modal(document.getElementById("editFirefighterModal"));
 
     let ifSelected = false;
 
@@ -140,12 +150,55 @@ document.addEventListener("DOMContentLoaded", async () => {
                 fetchAndDisplayItems(searchQuery);
                 deleteItemModal.hide();
             });
-        } 
+        }
+
+        if (editFirefighterForm) {
+            editFirefighterForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const firefighterData = {
+                    id: parseInt(document.getElementById("firefighterId").value.trim() || "0", 10),
+                    employeeId: document.getElementById("editEmployeeId").value.trim(),
+                    name: capitalizeWords(document.getElementById("editName").value.trim()),
+                    gender: document.getElementById("editGender").value.trim(),
+                    rank: document.getElementById("editRank").value.trim().toUpperCase(),
+                    contactNumber: parseInt(document.getElementById("editContactNumber").value.trim() || "0", 10),
+                    email: document.getElementById("editEmail").value.trim(),
+                    address: capitalizeWords(document.getElementById("editAddress").value.trim()),
+                    status: document.getElementById("editStatus").value.trim()
+                };
+            
+                const response = await window.electronAPI.editFirefighter(firefighterData);
+                window.electronAPI.showToast(response.message, response.success);
+                editFirefighterModal.hide();
+                fetchAndDisplayItems(searchQuery);
+            })
+        }
     };
 
 });
 
 let items = [];
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.body.addEventListener("click", (event) => {
+        if (event.target.classList.contains("edit-item")) {
+            const itemId = event.target.id.replace("edit-", "");
+            const selectedItem = items.find((item) => item.id == itemId);
+            if (selectedItem) {
+                document.getElementById("firefighterId").value = selectedItem.id;
+                document.getElementById("editEmployeeId").value = selectedItem.employeeId;
+                document.getElementById("editName").value = selectedItem.name;
+                document.getElementById("editGender").value = selectedItem.gender;
+                document.getElementById("editRank").value = selectedItem.rank;
+                document.getElementById("editContactNumber").value = selectedItem.contactNumber;
+                document.getElementById("editEmail").value = selectedItem.email;
+                document.getElementById("editAddress").value = selectedItem.address;
+                document.getElementById("editStatus").value = selectedItem.status;
+            }
+        }
+    });
+});
 
 document.getElementById("searchPulledItem").addEventListener("input", (event) => {
     searchQuery = event.target.value.trim();
@@ -204,13 +257,14 @@ async function fetchAndDisplayItems(searchQuery = "") {
                 <td>${item.employeeId}</td>
                 <td>${item.rank}</td>
                 <td>${item.name}</td>
+                <td>${item.address}</td>
                 <td>${item.gender}</td>
                 <td>${item.email}</td>
                 <td>${item.contactNumber}</td>
                 <td><span class="badge d-flex justify-content-center" style="${itemStatus(item.status)}">${item.status}</span></td>
                 <td>
                     <span data-bs-toggle="modal" data-bs-target="#editFirefighterModal">
-                        <i class="edit-icon icon-btn icon material-icons ms-3" data-bs-toggle="tooltip"
+                        <i id="edit-${item.id}" class="edit-icon icon-btn icon material-icons ms-3 edit-item" data-bs-toggle="tooltip"
                             data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Edit">edit</i>
                     </span>
                 </td>

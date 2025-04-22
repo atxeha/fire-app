@@ -48,6 +48,18 @@
                         title="Delete selected"
                         id="deleteSelected">delete</i>
                 </div>
+                
+                <div>
+                    <span data-bs-toggle="modal" data-bs-target="#addFirefighterModal">
+                        <i class="mt-1 material-icons icon icon-btn"
+                            style="cursor: pointer; padding-left: 2px;"
+                            data-bs-placement="right"
+                            data-bs-toggle="tooltip"
+                            data-bs-custom-class="custom-tooltip"
+                            title="Add firefighter"
+                            id="addFirefighter">group_add</i>
+                    </span>
+                </div>
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
                         style="cursor: pointer;"
@@ -74,10 +86,11 @@
                                 <th id="checkboxColumn" style="width: 3rem; display: none;">
                                     <input type="checkbox" id="selectAllCheckbox">
                                 </th>
-                                <th>No.</th>
-                                <th>Employee ID</th>
+                                <th>Seq</th>
+                                <th>ID No</th>
                                 <th>Rank</th>
-                                <th style="min-width: 15rem;">Name</th>
+                                <th style="min-width: 13rem;">Name</th>
+                                <th>Address</th>
                                 <th>Gender</th>
                                 <th>Email</th>
                                 <th>Contact No.</th>
@@ -119,6 +132,7 @@
                     <h6 class="modal-title" id="editFirefighterModalLabel">Update Inforamtion</h6>
                 </div>
                 <form method="post" id="editFirefighterForm">
+                    <input type="hidden" id="firefighterId">
                     <div class="modal-body font p-4 pb-2">
                         <div class="row font mb-4">
                             <div class="input-field col-5">
@@ -147,7 +161,7 @@
                             </div>
                             <div class="input-field col-4">
                                 <label class="mb-2 ms-2" for="editContactNumber">Contact Number</label>
-                                <input type="number" id="editContactNumber" class="search-box form-control rounded-5 font">
+                                <input type="text" id="editContactNumber" class="search-box form-control rounded-5 font">
                             </div>
                             <div class="input-field col-5">
                                 <label class="mb-2 ms-2" for="editEmail">Email</label>
@@ -192,6 +206,7 @@
     </div>
     <script src="./js/utils/toast.js"></script>
     <script src="./js/firefighter.js"></script>
+    <script src="./js/loadModal.js"></script>
     <script src="./js/utils/fireDefaultDate.js"></script>
     <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../node_modules/toastify-js/src/toastify.js"></script>
