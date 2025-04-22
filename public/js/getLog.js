@@ -10,6 +10,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+function capitalizeWords(str) {
+    return str
+        .toLowerCase() // Convert entire string to lowercase first
+        .split(" ") // Split into words
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize first letter
+        .join(" "); // Join words back into a string
+}
+
 async function displayLogs(searchQuery = "") {
     try {
         const logs = await window.electronAPI.getLog();
@@ -78,7 +86,7 @@ async function displayLogs(searchQuery = "") {
                 .replace(",", " --");
 
             row.innerHTML = `
-                <td>@${log.user.name}</td>
+                <td>@${capitalizeWords(log.user.name)}</td>
                 <td class="pb-2">
                         ${log.log}
                 </td>

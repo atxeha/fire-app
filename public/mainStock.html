@@ -17,6 +17,8 @@
 
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
 
+    <link rel="stylesheet" href="./css/pass.css">
+
     <link rel="stylesheet" href="./css/index.css">
 
     <title>BFP Camiguin</title>
@@ -64,6 +66,16 @@
                             title="Add firefighter"
                             id="addFirefighter">group_add</i>
                     </span>
+                </div>
+                
+                <div>
+                    <i class="mt-1 material-icons icon icon-btn"
+                        style="cursor: pointer; padding-left: 2px;"
+                        data-bs-placement="right"
+                        data-bs-toggle="tooltip"
+                        data-bs-custom-class="custom-tooltip"
+                        title="View firefighter list"
+                        id="firefighterList">manage_search</i>
                 </div>
                 <div>
                     <span data-bs-toggle="modal" data-bs-target="#logModal">
@@ -121,7 +133,7 @@
                     data-bs-toggle="tooltip"
                     data-bs-custom-class="custom-tooltip"        
                     title="In use equipments"
-                    id="viewPulledItem">arrow_outward</i>
+                    id="viewPulledItem">more_horiz</i>
                 </div>
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
@@ -332,7 +344,7 @@
                 <div class="modal-body font p-4 pb-2">
                     <form method="post" id="deleteItemForm">
                         <div class="font mb-4">
-                            <p>Are sure to delete item selected item(s)?</p>
+                            <p>Are sure to delete selected item(s)?</p>
                         </div>
                         <div class="modal-footer font">
                             <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Close</button>
@@ -515,7 +527,47 @@
                         </div>
                 
                         <div class="modal-footer font d-flex justify-content-between">
-                                <button type="button" class="btn btn-link btn-link-green font p-0 me-3" id="viewFirefighter">View</button>
+                                <button type="button" class="btn btn-link btn-link-green font p-0 me-3" id="viewFirefighter">View list</button>
+                                <div>
+                                    <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Discard</button>
+                                    <button class="btns secondary-btn rounded-5 font" type="submit">Save</button>
+
+                                </div>
+                        </div>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Update Admin Account Modal -->
+    <div class="modal" id="updateAccountModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="1" aria-labelledby="updateAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="updateAccountModalLabel">Change Password</h6>
+                </div>
+                <form method="post" id="updateAccountForm">
+                    <div class="modal-body font p-4 pb-2">
+                        <div class="row font mb-4">
+                            <div class="input-field col-6">
+                                <label class="mb-2 ms-2" for="username">Username</label>
+                                <input type="text" id="username" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-6">
+                                <label class="mb-2 ms-2" for="oldPassword">Old Password</label>
+                                <input type="text" id="oldPassword" class="search-box form-control rounded-5 font">
+                            </div>
+                        </div>
+                        <div class="row font mb-4 d-flex justify-content-end">
+                            <div class="input-field col-6">
+                                <label class="mb-2 ms-2" for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" class="search-box form-control rounded-5 font">
+                                <i class="material-icons toggle-password mt-2 pt-3" id="toggleIcon">visibility_off</i>
+                            </div>
+                        </div>
+            
+                        <div class="modal-footer font d-flex justify-content-end">
                                 <div>
                                     <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Discard</button>
                                     <button class="btns secondary-btn rounded-5 font" type="submit">Save</button>
@@ -532,6 +584,7 @@
     <script src="./js/getLog.js"></script>
     <script src="./js/utils/defaultDate.js"></script>
     <script src="./js/utils/toast.js"></script>
+    <script src="./js/utils/pass.js"></script>
     <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../node_modules/toastify-js/src/toastify.js"></script>
 </body>

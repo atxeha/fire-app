@@ -3,33 +3,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     fetchAndDisplayItems(searchQuery);
 
+    const label = document.getElementById("label");
+    const statusFilter = document.getElementById("statusFilter");
+
+    if (statusFilter) {
+        statusFilter.addEventListener("change", () => {
+            label.textContent = statusFilter.value === "IN_USE" ? "In Use Equipments" : "Returned Equipments"
+            fetchAndDisplayItems();
+        });
+    }
+
     const backBtn = document.getElementById("backBtn");
 
     const tableContainer = document.querySelector(".table-container");
     const tableHead = document.querySelector(".table thead");
-    const deleteItemForm = document.getElementById("deleteItemForm");
-    const deleteItemModal = new bootstrap.Modal(document.getElementById("deleteItemModal"));
 
-    const exportButton = document.getElementById("exportItem");
     const selectAllIcon = document.getElementById("selectAllItem");
     const selectItemIcon = document.getElementById("selectItem");
-    const deleteSelectedBtn = document.getElementById("deleteSelected")
+    const returnForm = document.getElementById("returnForm");
+    const returnModal = new bootstrap.Modal(document.getElementById("returnModal"));
+    const returnMultipleModal = new bootstrap.Modal(document.getElementById("returnMultipleModal"));
 
-    if (exportButton) {
-        exportButton.addEventListener("click", async () => {
-            const checkboxes = document.querySelectorAll(".rowCheckbox:checked");
-            const selectedIds = Array.from(checkboxes).map(checkbox => String(checkbox.dataset.id));
-
-            if (selectedIds.length === 0) {
-                window.electronAPI.showToast("No items selected.", false);
-                return;
-            }
-            const tableName = "equipmentLog";
-            const response = await window.electronAPI.exportItems({ tableName, selectedIds });
-
-            window.electronAPI.showToast(response.message, response.success);
-        });
-    }
+    const returnMultipleForm = document.getElementById("returnMultipleForm");
+    const returnSelected = document.getElementById("returnItem");
 
     let ifSelected = false;
 
@@ -118,46 +114,87 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         }
 
-        if (deleteSelectedBtn) {
-            deleteSelectedBtn.addEventListener("click", (event) => {
-                const checkboxes = document.querySelectorAll(".rowCheckbox:checked");
-                const selectedIds = Array.from(checkboxes).map(checkbox => String(checkbox.dataset.id));
-        
-                if (selectedIds.length === 0) {
-                    window.electronAPI.showToast("No items selected.", false);
-                    return;
+        if (returnForm) {
+            returnForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const returnId = document.getElementById("returnId").value.trim();
+
+                try {
+                    const response = await window.electronAPI.returnEquipment(returnId)
+
+                    if (response.success) {
+                        window.electronAPI.showToast(response.message, response.success)
+
+                        returnModal.hide()
+                        fetchAndDisplayItems(searchQuery)
+                    } else {
+                        window.electronAPI.showToast(response.message, response.success)
+                    }
+                    
+                } catch (error) {
+                    console.log(error)
                 }
-        
-                deleteItemModal.show();
-            });
+            })
         }
 
-        if (deleteItemForm) {
-            deleteItemForm.addEventListener("submit", async (event) => {
-                event.preventDefault();
-        
+        if (returnSelected) {
+            returnSelected.addEventListener("click", (event) => {
                 const checkboxes = document.querySelectorAll(".rowCheckbox:checked");
                 const selectedIds = Array.from(checkboxes).map(checkbox => String(checkbox.dataset.id));
-        
+
                 if (selectedIds.length === 0) {
                     window.electronAPI.showToast("No items selected.", false);
                     return;
                 }
         
-                const tableName = "equipmentLog";
-                const response = await window.electronAPI.deleteSelectedItems(tableName, selectedIds);
-        
-                document.getElementById("checkboxColumn").style.display = "none";
-        
-                window.electronAPI.showToast(response.message, response.success);
-                fetchAndDisplayItems(searchQuery);
-                deleteItemModal.hide();
+                returnMultipleModal.show();
             });
-        } 
+        }
+    
+        if (returnMultipleForm) {
+            returnMultipleForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+    
+                const checkboxes = document.querySelectorAll(".rowCheckbox:checked");
+                const selectedIds = Array.from(checkboxes).map(checkbox => String(checkbox.dataset.id));
+    
+                if (selectedIds.length === 0) {
+                    window.electronAPI.showToast("No items selected.", false);
+                    return;
+                }
+    
+                const response = await window.electronAPI.returnMultipleEquipments( selectedIds );
+    
+                returnMultipleModal.hide()
+                fetchAndDisplayItems(searchQuery)
+    
+                window.electronAPI.showToast(response.message, response.success);
+            });
+        }
     };
 });
 
 let items = [];
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.body.addEventListener("click", (event) => {
+        if (event.target.classList.contains("return-item")) {
+            const itemId = event.target.id.replace("return-", "");
+
+            console.log("Available items:", items);
+
+            const selectedItem = items.find((item) => item.id == itemId);
+            
+            console.log(selectedItem)
+            
+            if (selectedItem) {
+                document.getElementById("returnId").value = selectedItem.id;
+                document.getElementById("equipmentName").textContent = `(${selectedItem.equipment.equipmentName})`;
+            }
+        }
+    });
+});
 
 document.getElementById("searchPulledItem").addEventListener("input", (event) => {
     searchQuery = event.target.value.trim();
@@ -166,9 +203,10 @@ document.getElementById("searchPulledItem").addEventListener("input", (event) =>
 
 async function fetchAndDisplayItems(searchQuery = "") {
     try {
-        items = await window.electronAPI.getEquipmentLog();
+        const statusFilter = document.getElementById("statusFilter").value.trim();
+        const normalizedStatus = statusFilter.toUpperCase();
 
-        console.log(items)
+        items = await window.electronAPI.getEquipmentLog(normalizedStatus);
 
         const tableBody = document.getElementById("pulledTableBody");
         const tableHead = document.getElementById("pulledTableHead");
@@ -213,8 +251,8 @@ async function fetchAndDisplayItems(searchQuery = "") {
         filteredItems.forEach((item, index) => {
             const row = document.createElement("tr");
 
-            const formattedDate = new Date(item.createdAt)
-                .toLocaleString("en-US", {
+            const formattedDate = new Date(statusFilter === "IN_USE" ? item.createdAt : item.equipment.updatedAt)
+                .toLocaleString("en-PH", {
                     timeZone: "Asia/Manila",
                     year: "2-digit",
                     month: "numeric",
@@ -242,8 +280,10 @@ async function fetchAndDisplayItems(searchQuery = "") {
                 <td>${item.fireFighter.name}</td>
                 <td>${formattedDate}</td>
                 <td>
-                    <i class="icon-btn icon material-icons ms-3" data-bs-toggle="tooltip"
-                        data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Return equipment" style="cursor: pointer;">keyboard_return</i>
+                    <span data-bs-toggle="modal" data-bs-target="#returnModal">
+                        <i id="return-${item.id}" class="icon-btn icon material-icons ms-3 return-item" data-bs-toggle="tooltip"
+                            data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Return equipment" style="cursor: pointer;">keyboard_return</i>
+                    </span>
                 </td>
             `;
             tableBody.appendChild(row);

@@ -54,24 +54,6 @@
                         data-bs-placement="top"
                         data-bs-toggle="tooltip"
                         data-bs-custom-class="custom-tooltip"
-                        title="Export data"
-                        id="exportItem">arrow_upward</i>
-                </div>
-                <div>
-                    <i class="mt-1 material-icons icon icon-btn"
-                        style="cursor: pointer;"
-                        data-bs-placement="top"
-                        data-bs-toggle="tooltip"
-                        data-bs-custom-class="custom-tooltip"
-                        title="Return selected"
-                        id="returnItem">keyboard_return</i>
-                </div>
-                <div>
-                    <i class="mt-1 material-icons icon icon-btn"
-                        style="cursor: pointer;"
-                        data-bs-placement="top"
-                        data-bs-toggle="tooltip"
-                        data-bs-custom-class="custom-tooltip"
                         title="Select item"
                         id="selectItem">check</i>
                 </div>
@@ -128,8 +110,89 @@
             </div>
         </div>
     </div>
+    <!-- Edit Fire Fighter Modal -->
+    <div class="modal" id="editFirefighterModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="1"
+        aria-labelledby="editFirefighterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="editFirefighterModalLabel">Update Inforamtion</h6>
+                </div>
+                <form method="post" id="editFirefighterForm">
+                    <div class="modal-body font p-4 pb-2">
+                        <div class="row font mb-4">
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="editEmployeeId">Employee ID</label>
+                                <input type="number" id="editEmployeeId" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="editName">Name <span class="text-muted"
+                                        style="font-size: 0.8rem;">(First Middle Last)</span></label>
+                                <input type="text" id="editName" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-2">
+                                <label class="mb-2 ms-2" for="editGender">Gender</label>
+                                <select type="text" id="editGender"
+                                    class="search-box form-select form-control rounded-5 font">
+                                    <option value="MALE">MALE</option>
+                                    <option value="FEMALE">FEMALE</option>
+                                </select>
+                            </div>
+                        </div>
+    
+                        <div class="row font mb-4">
+                            <div class="input-field col-3">
+                                <label class="mb-2 ms-2" for="editRank">Rank</label>
+                                <input type="text" id="editRank" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-4">
+                                <label class="mb-2 ms-2" for="editContactNumber">Contact Number</label>
+                                <input type="number" id="editContactNumber" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="editEmail">Email</label>
+                                <input type="text" id="editEmail" class="search-box form-control rounded-5 font">
+                            </div>
+                        </div>
+                        <div class="row font mb-4">
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="editAddress">Address</label>
+                                <input type="text" id="editAddress" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-3">
+                                <label class="mb-2 ms-2" for="editStatus">Status</label>
+                                <select type="text" id="editStatus"
+                                    class="search-box form-select form-control rounded-5 font">
+                                    <option value="ACTIVE">ACTIVE</option>
+                                    <option value="INACTIVE">INACTIVE</option>
+                                    <option value="RETIRED">RETIRED</option>
+                                    <option value="ON_LEAVE">ON_LEAVE</option>
+                                </select>
+                            </div>
+                            <div class="input-field col-4">
+                                <label class="mb-2 ms-2" for="addDates">Date <span class="text-muted"
+                                        style="font-size: 0.8rem;">(Today)</span></label>
+                                <input type="datetime-local" id="addDates"
+                                    class="search-box form-control rounded-5 font date" disabled>
+                            </div>
+                        </div>
+    
+                        <div class="modal-footer font d-flex justify-content-end">
+                            <div>
+                                <button type="button" class="btn btn-link font p-0 me-3"
+                                    data-bs-dismiss="modal">Discard</button>
+                                <button class="btns secondary-btn rounded-5 font" type="submit">Save</button>
+    
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script src="./js/utils/toast.js"></script>
     <script src="./js/firefighter.js"></script>
+    <script src="./js/utils/fireDefaultDate.js"></script>
     <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../node_modules/toastify-js/src/toastify.js"></script>
 </body>

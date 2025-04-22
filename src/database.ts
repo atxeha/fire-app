@@ -2,7 +2,7 @@ import path from "path";
 import { app } from "electron";
 import fs, { stat } from "fs";
 import { PrismaClient} from "@prisma/client";
-import { EquipmentStatus } from "@prisma/client";
+import { EquipmentStatus, EquipmentLogStatus } from "@prisma/client";
 import bcrypt from 'bcrypt';
 
 // Determine database path
@@ -274,10 +274,102 @@ export async function pullEquipment(
     }
 }
 
+export async function returnEquipment(
+    equipmentLogId: string
+): Promise<{ success: boolean; message: string; item?: object }> {
+    try {
+        return await prisma.$transaction(async (tx) => {
 
-export async function getEquipmentLog() {
+            const equipmentLog = await tx.equipmentLog.findUnique({
+                where: { id: equipmentLogId },
+            });
+
+            if (!equipmentLog) {
+                throw new Error("Equipment log not found.");
+            }
+
+            const updatedItem = await tx.equipment.update({
+                where: { id: equipmentLog.equipmentId },
+                data: {
+                    quantity: { increment: equipmentLog.quantity },
+                },
+            });
+
+            await tx.equipmentLog.update({
+                where: { id: equipmentLogId },
+                data: {
+                    status: "RETURNED",
+                    returnedAt: new Date(),
+                },
+            });
+
+            return {
+                success: true,
+                message: "Item successfully returned.",
+                item: updatedItem,
+            };
+        });
+    } catch (error) {
+        return {
+            success: false,
+            message: (error as Error).message,
+        };
+    }
+}
+
+export async function returnMultipleEquipments(
+  equipmentLogIds: string[]
+): Promise<{ success: boolean; message: string; returnedItems?: object[] }> {
+  try {
+      return await prisma.$transaction(async (tx) => {
+          const returnedItems = [];
+
+          for (const equipmentLogId of equipmentLogIds) {
+              const equipmentLog = await tx.equipmentLog.findUnique({
+                  where: { id: equipmentLogId },
+              });
+
+              if (!equipmentLog) {
+                  throw new Error(`Equipment log not found for ID: ${equipmentLogId}`);
+              }
+
+              const updatedItem = await tx.equipment.update({
+                  where: { id: equipmentLog.equipmentId },
+                  data: {
+                      quantity: { increment: equipmentLog.quantity },
+                  },
+              });
+
+              await tx.equipmentLog.update({
+                  where: { id: equipmentLogId },
+                  data: {
+                      status: "RETURNED",
+                      returnedAt: new Date(),
+                  },
+              });
+
+              returnedItems.push(updatedItem);
+          }
+
+          return {
+              success: true,
+              message: `${returnedItems.length} item(s) returned.`,
+              returnedItems,
+          };
+      });
+  } catch (error) {
+      return {
+          success: false,
+          message: (error as Error).message,
+      };
+  }
+}
+
+
+export async function getEquipmentLog(status: EquipmentLogStatus) {
   try {
     return await prisma.equipmentLog.findMany({
+      where: { status },
       orderBy: {
         createdAt: "desc",
       },

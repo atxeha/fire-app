@@ -31,9 +31,13 @@
                     <i class="icon-btn icon material-icons"
                         id="backBtn">chevron_left</i>
                 </div>
-                <h4 class="text-center mb-4 ms-2">In Use Equipments</h4>
+                <h4 id="label" class="text-center mb-4 ms-2">In Use Equipments</h4>
             </div>
             <div class="d-flex gap-3 search-input">
+                <select class="form-select form-control filter" id="statusFilter">
+                    <option value="IN_USE" selected>IN USE</option>
+                    <option value="RETURNED">RETURNED</option>
+                </select>
                 <input type="search" class="search-box search-width form-control rounded-5 font me-4" id="searchPulledItem" placeholder="Search code or date">
             </div>
         </div>
@@ -41,30 +45,12 @@
             <div class="d-flex flex-column gap-2 pt-5 ps-1 pe-3">
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
-                        style="cursor: pointer;"
-                        data-bs-placement="top"
-                        data-bs-toggle="tooltip"
-                        data-bs-custom-class="custom-tooltip"
-                        title="Delete selected"
-                        id="deleteSelected">delete</i>
-                </div>
-                <div>
-                    <i class="mt-1 material-icons icon icon-btn"
-                        style="cursor: pointer;"
-                        data-bs-placement="top"
-                        data-bs-toggle="tooltip"
-                        data-bs-custom-class="custom-tooltip"
-                        title="Export data"
-                        id="exportItem">arrow_upward</i>
-                </div>
-                <div>
-                    <i class="mt-1 material-icons icon icon-btn"
-                        style="cursor: pointer;"
-                        data-bs-placement="top"
-                        data-bs-toggle="tooltip"
-                        data-bs-custom-class="custom-tooltip"
-                        title="Return selected"
-                        id="returnItem">keyboard_return</i>
+                    style="cursor: pointer;"
+                    data-bs-placement="top"
+                    data-bs-toggle="tooltip"
+                    data-bs-custom-class="custom-tooltip"
+                    title="Return selected"
+                    id="returnItem">keyboard_return</i>
                 </div>
                 <div>
                     <i class="mt-1 material-icons icon icon-btn"
@@ -94,7 +80,7 @@
                                 </th>
                                 <th>No.</th>
                                 <th>Code</th>
-                                <th style="min-width: 18rem;">Item</th>
+                                <th style="min-width: 10rem;">Item</th>
                                 <th>QTY</th>
                                 <th>Unit</th>
                                 <th>Released by</th>
@@ -122,6 +108,43 @@
                         <div class="modal-footer font">
                             <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Close</button>
                             <button class="btns secondary-btn rounded-5 font" type="submit">Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Return Equipment  Modal -->
+    <div class="modal" id="returnModal" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body font p-4 pb-2">
+                    <form method="post" id="returnForm">
+                        <input type="hidden" id="returnId">
+                        <div class="font mb-4">
+                            <p>Are sure to return equipment <span><i id="equipmentName"></i></span>?</p>
+                        </div>
+                        <div class="modal-footer font">
+                            <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Close</button>
+                            <button class="btns secondary-btn rounded-5 font" type="submit">Return</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Return Mutiple Equipment  Modal -->
+    <div class="modal" id="returnMultipleModal" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body font p-4 pb-2">
+                    <form method="post" id="returnMultipleForm">
+                        <div class="font mb-4">
+                            <p>Are sure to return selected equipment(s)?</p>
+                        </div>
+                        <div class="modal-footer font">
+                            <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Close</button>
+                            <button class="btns secondary-btn rounded-5 font" type="submit">Return</button>
                         </div>
                     </form>
                 </div>

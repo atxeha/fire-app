@@ -81,10 +81,17 @@ model EquipmentLog {
   fireFighterId String
   releasedBy    String
   quantity      Int
+  status        EquipmentLogStatus @default(IN_USE)
+  returnedAt     DateTime?
   createdAt     DateTime @default(now())
 
   equipment   Equipment   @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
   fireFighter Firefighter @relation(fields: [fireFighterId], references: [id], onDelete: Cascade)
+}
+
+enum EquipmentLogStatus {
+  RETURNED
+  IN_USE
 }
 
 model Log {

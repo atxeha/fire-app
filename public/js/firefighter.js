@@ -9,26 +9,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tableHead = document.querySelector(".table thead");
     const deleteItemForm = document.getElementById("deleteItemForm");
     const deleteItemModal = new bootstrap.Modal(document.getElementById("deleteItemModal"));
-    const exportButton = document.getElementById("exportItem");
     const selectAllIcon = document.getElementById("selectAllItem");
     const selectItemIcon = document.getElementById("selectItem");
     const deleteSelectedBtn = document.getElementById("deleteSelected")
-
-    if (exportButton) {
-        exportButton.addEventListener("click", async () => {
-            const checkboxes = document.querySelectorAll(".rowCheckbox:checked");
-            const selectedIds = Array.from(checkboxes).map(checkbox => String(checkbox.dataset.id));
-
-            if (selectedIds.length === 0) {
-                window.electronAPI.showToast("No items selected.", false);
-                return;
-            }
-            const tableName = "addedItem";
-            const response = await window.electronAPI.exportItems({ tableName, selectedIds });
-
-            window.electronAPI.showToast(response.message, response.success);
-        });
-    }
 
     let ifSelected = false;
 
@@ -37,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!ifSelected) {
                 const checkboxColumn = document.getElementById("checkboxColumn");
                 const checkboxCells = document.querySelectorAll(".checkboxCell input");
-                const rows = document.querySelectorAll("#pulledItemTable tr");
+                const rows = document.querySelectorAll("#fighterTableBody tr");
 
                 if (checkboxCells.length > 0) {
                     const isCurrentlyHidden = checkboxColumn.style.display === "none";
@@ -62,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         selectAllIcon.addEventListener("click", () => {
             const checkboxColumn = document.getElementById("checkboxColumn");
             const checkboxCells = document.querySelectorAll(".checkboxCell input");
-            const rows = document.querySelectorAll("#pulledItemTable tr");
+            const rows = document.querySelectorAll("#fighterTableBody tr");
 
             if (checkboxCells.length > 0) {
                 const isCurrentlyHidden = checkboxColumn.style.display === "none";
@@ -226,8 +209,10 @@ async function fetchAndDisplayItems(searchQuery = "") {
                 <td>${item.contactNumber}</td>
                 <td><span class="badge d-flex justify-content-center" style="${itemStatus(item.status)}">${item.status}</span></td>
                 <td>
-                    <i class="edit-icon icon-btn icon material-icons ms-3" data-bs-toggle="tooltip"
-                        data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Edit">edit</i>
+                    <span data-bs-toggle="modal" data-bs-target="#editFirefighterModal">
+                        <i class="edit-icon icon-btn icon material-icons ms-3" data-bs-toggle="tooltip"
+                            data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Edit">edit</i>
+                    </span>
                 </td>
             `;
             tableBody.appendChild(row);

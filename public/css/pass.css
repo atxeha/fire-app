@@ -1,0 +1,14 @@
+
+.toggle-password {
+    position: absolute;
+    right: 34px;
+    top: 140px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #d1bebe;
+    font-size: 1.2rem ;
+    transition: all 0.1s ease-in-out;
+}
+.toggle-password:hover {
+    color: #b9a4a4;
+}

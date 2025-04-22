@@ -211,3 +211,10 @@ input[type="checkbox"] {
     font-style: italic;
     color: #7f7c8a;
 }
+.filter {
+    border: none;
+    box-shadow: none !important;
+    font-size: .9rem;
+    width: 120px;
+    margin-bottom: 18px;
+}

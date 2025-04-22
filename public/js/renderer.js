@@ -50,10 +50,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const selectItemIcon = document.getElementById("selectItem");
 
     const exportButton = document.getElementById("exportItem");
-    const importButton = document.getElementById("importItem")
     const deleteSelectedBtn = document.getElementById("deleteSelected")
 
     const select = document.getElementById("pullfireFighterId");
+
+    const firefighterList = document.getElementById("firefighterList");
 
     async function getFirefighterList() {
         const response = await window.electronAPI.getFirefighters();
@@ -61,7 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             response.data.forEach((firefighter) => {
             const option = document.createElement("option");
             option.value = firefighter.id;
-            option.textContent = `${firefighter.name}`;
+            option.textContent = `${firefighter.name} (${firefighter.status})`;
             select.appendChild(option);
             });
         } else {
@@ -240,7 +241,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             })
         }
 
-        // Only add event listener if form exists
+        if (firefighterList) {
+            firefighterList.addEventListener("click", (event) => {
+                event.preventDefault();
+                window.electronAPI.navigate("firefighter.html")
+            })
+        }
+
         if (addItemForm) {
             addItemForm.addEventListener("submit", async (event) => {
                 event.preventDefault();

@@ -13,7 +13,9 @@ import {
   getEquipmentList,
   addEquipment,
   editEquipment,
-  getEquipmentLog
+  getEquipmentLog,
+  returnEquipment,
+  returnMultipleEquipments
 } from "./database";
 import { execSync } from "child_process";
 import * as XLSX from "xlsx";
@@ -138,6 +140,14 @@ ipcMain.handle("pull-equipment", async (event, pullData) => {
   }
 });
 
+ipcMain.handle('return-equipment', async (event, equipmentLogId: string) => {
+  return await returnEquipment(equipmentLogId);
+});
+
+ipcMain.handle("return-multiple-equipment", async (event, equipmentLogIds: string[]) => {
+  return await returnMultipleEquipments(equipmentLogIds);
+});
+
 ipcMain.handle("get-equipment-list", async () => {
   try {
     return getEquipmentList(); // Fetch and return all items
@@ -147,9 +157,9 @@ ipcMain.handle("get-equipment-list", async () => {
   }
 });
 
-ipcMain.handle("get-equipment-log", async () => {
+ipcMain.handle("get-equipment-log", async (event, data) => {
   try {
-    return getEquipmentLog();
+    return getEquipmentLog(data);
   } catch (error) {
     console.error("Error fetching pulled equipments.", error);
     return [];
@@ -197,7 +207,7 @@ app.on("window-all-closed", () => {
 
 ipcMain.handle("export-items", async (event, { tableName, selectedIds }: { tableName: string, selectedIds: string[] }) => {
     try {
-        const validTables = ["equipment", "pulledItem", "equipmentLog", "addedItem"];
+        const validTables = ["equipment", "pulledItem", "equipmentLog", "addedItem", "firefighter"];
         if (!validTables.includes(tableName)) {
             return { success: false, message: `Invalid table: ${tableName}` };
         }
@@ -350,6 +360,7 @@ ipcMain.handle("get-firefighters", async () => {
         select: {
           id: true,
           name: true,
+          status: true,
         },
       });
       return { success: true, data: firefighters };

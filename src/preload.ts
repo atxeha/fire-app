@@ -5,7 +5,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   addEquipment: (data: any) => ipcRenderer.invoke("add-equipment", data),
   getEquipmentList: () => ipcRenderer.invoke("get-equipment-list"),
   pullEquipment: (data: any) => ipcRenderer.invoke("pull-equipment", data),
-  getEquipmentLog: () => ipcRenderer.invoke("get-equipment-log"),
+  returnEquipment: (equipmentLogId: string) => ipcRenderer.invoke('return-equipment',equipmentLogId),
+  returnMultipleEquipments: (equipmentLogIds: string[]) => ipcRenderer.invoke("return-multiple-equipment", equipmentLogIds),
+  getEquipmentLog: (data: any) => ipcRenderer.invoke("get-equipment-log", data),
   showToast: (message: string, success: boolean) => {
     window.postMessage({ type: "show-toast", message, success });
   },
