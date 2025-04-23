@@ -1,3 +1,5 @@
+const checkboxColumn = document.getElementById("checkboxColumn");
+
 document.addEventListener("DOMContentLoaded", async () => {
     let searchQuery = "";
 
@@ -5,10 +7,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const label = document.getElementById("label");
     const statusFilter = document.getElementById("statusFilter");
+    
+    const returnSelected = document.getElementById("returnItem");
 
     if (statusFilter) {
         statusFilter.addEventListener("change", () => {
             label.textContent = statusFilter.value === "IN_USE" ? "In Use Equipments" : "Returned Equipments"
+            returnSelected.textContent = statusFilter.value === "IN_USE" ? "keyboard_return" : "delete"
             fetchAndDisplayItems();
         });
     }
@@ -22,17 +27,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     const selectItemIcon = document.getElementById("selectItem");
     const returnForm = document.getElementById("returnForm");
     const returnModal = new bootstrap.Modal(document.getElementById("returnModal"));
+    const deleteReturnModal = new bootstrap.Modal(document.getElementById("deleteReturnModal"));
     const returnMultipleModal = new bootstrap.Modal(document.getElementById("returnMultipleModal"));
+    const deleteReturnMultipleModal = new bootstrap.Modal(document.getElementById("deleteReturnMultipleModal"));
 
     const returnMultipleForm = document.getElementById("returnMultipleForm");
-    const returnSelected = document.getElementById("returnItem");
+
+    const deleteReturnMultipleForm = document.getElementById("deleteReturnMultipleForm");
+    const deleteReturnForm = document.getElementById("deleteReturnForm");
 
     let ifSelected = false;
 
     if (selectItemIcon) {
         selectItemIcon.addEventListener("click", () => {
             if (!ifSelected) {
-                const checkboxColumn = document.getElementById("checkboxColumn");
                 const checkboxCells = document.querySelectorAll(".checkboxCell input");
 
                 if (checkboxCells.length > 0) {
@@ -51,7 +59,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (selectAllIcon) {
         selectAllIcon.addEventListener("click", () => {
-            const checkboxColumn = document.getElementById("checkboxColumn");
             const checkboxCells = document.querySelectorAll(".checkboxCell input");
             const rows = document.querySelectorAll("#pulledTableBody tr");
 
@@ -127,6 +134,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         window.electronAPI.showToast(response.message, response.success)
 
                         returnModal.hide()
+                        checkboxColumn.style.display = "none";
                         fetchAndDisplayItems(searchQuery)
                     } else {
                         window.electronAPI.showToast(response.message, response.success)
@@ -148,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     return;
                 }
         
-                returnMultipleModal.show();
+                statusFilter.value === "IN_USE" ? returnMultipleModal.show() : deleteReturnMultipleModal.show()
             });
         }
     
@@ -167,9 +175,54 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const response = await window.electronAPI.returnMultipleEquipments( selectedIds );
     
                 returnMultipleModal.hide()
+                checkboxColumn.style.display = "none";
                 fetchAndDisplayItems(searchQuery)
     
                 window.electronAPI.showToast(response.message, response.success);
+            });
+        }
+        if (deleteReturnForm) {
+            deleteReturnForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const deleteId = document.getElementById("deleteId").value.trim();
+
+                try {
+                    const response = await window.electronAPI.deleteReturnEquipment(deleteId)
+
+                    if (response.success) {
+                        window.electronAPI.showToast(response.message, response.success)
+
+                        deleteReturnModal.hide()
+                        checkboxColumn.style.display = "none";
+                        fetchAndDisplayItems(searchQuery)
+                    } else {
+                        window.electronAPI.showToast(response.message, response.success)
+                    }
+                    
+                } catch (error) {
+                    console.log(error)
+                }
+            })
+        }
+        if (deleteReturnMultipleForm) {
+            deleteReturnMultipleForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+        
+                const checkboxes = document.querySelectorAll(".rowCheckbox:checked");
+                const selectedIds = Array.from(checkboxes).map(checkbox => String(checkbox.dataset.id));
+        
+                if (selectedIds.length === 0) {
+                    window.electronAPI.showToast("No items selected.", false);
+                    return;
+                }
+        
+                const tableName = "equipmentLog";
+                const response = await window.electronAPI.deleteSelectedItems(tableName, selectedIds);
+                deleteReturnMultipleModal.hide();
+                checkboxColumn.style.display = "none";
+                window.electronAPI.showToast(response.message, response.success);
+                fetchAndDisplayItems(searchQuery);
             });
         }
     };
@@ -191,6 +244,25 @@ document.addEventListener("DOMContentLoaded", function () {
             if (selectedItem) {
                 document.getElementById("returnId").value = selectedItem.id;
                 document.getElementById("equipmentName").textContent = `(${selectedItem.equipment.equipmentName})`;
+            }
+        }
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.body.addEventListener("click", (event) => {
+        if (event.target.classList.contains("delete-item")) {
+            const itemId = event.target.id.replace("delete-", "");
+
+            console.log("Available items:", items);
+
+            const selectedItem = items.find((item) => item.id == itemId);
+            
+            console.log(selectedItem)
+            
+            if (selectedItem) {
+                document.getElementById("deleteId").value = selectedItem.id;
+                document.getElementById("dequipmentName").textContent = `(${selectedItem.equipment.equipmentName})`;
             }
         }
     });
@@ -282,9 +354,9 @@ async function fetchAndDisplayItems(searchQuery = "") {
                 <td>${item.fireFighter.name}</td>
                 <td>${formattedDate}</td>
                 <td>
-                    <span data-bs-toggle="modal" data-bs-target="#returnModal">
-                        <i id="return-${item.id}" class="icon-btn icon material-icons ms-3 return-item" data-bs-toggle="tooltip"
-                            data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Return equipment" style="cursor: pointer;">keyboard_return</i>
+                    <span data-bs-toggle="modal" data-bs-target="${statusFilter === "IN_USE" ? '#returnModal' : '#deleteReturnModal'}">
+                        <i id="${statusFilter === "IN_USE" ? `return-${item.id}` : `delete-${item.id}`}" class="icon-btn icon material-icons ms-3 ${statusFilter === "IN_USE" ? `return-item` : `delete-item`}" data-bs-toggle="tooltip"
+                            data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Return equipment" style="cursor: pointer;">${statusFilter === "IN_USE" ? 'keyboard_return' : 'delete'}</i>
                     </span>
                 </td>
             `;

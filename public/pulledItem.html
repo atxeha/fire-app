@@ -96,24 +96,6 @@
             </div>
         </div>
     </div>
-    <!-- Delete Item Modal -->
-    <div class="modal" id="deleteItemModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body font p-4 pb-2">
-                    <form method="post" id="deleteItemForm">
-                        <div class="font mb-4">
-                            <p>Are sure to delete selected item(s)</p>
-                        </div>
-                        <div class="modal-footer font">
-                            <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Close</button>
-                            <button class="btns secondary-btn rounded-5 font" type="submit">Delete</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Return Equipment  Modal -->
     <div class="modal" id="returnModal" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -145,6 +127,43 @@
                         <div class="modal-footer font">
                             <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Close</button>
                             <button class="btns secondary-btn rounded-5 font" type="submit">Return</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Delete Item Modal -->
+    <div class="modal" id="deleteReturnModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body font p-4 pb-2">
+                    <form method="post" id="deleteReturnForm">
+                        <input type="hidden" id="deleteId">
+                        <div class="font mb-4">
+                            <p>Are sure to delete equipment<span><i id="dequipmentName"></i></span>?</p>
+                        </div>
+                        <div class="modal-footer font">
+                            <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Close</button>
+                            <button class="btns secondary-btn rounded-5 font" type="submit">Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Delete Mutiple Equipment  Modal -->
+    <div class="modal" id="deleteReturnMultipleModal" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body font p-4 pb-2">
+                    <form method="post" id="deleteReturnMultipleForm">
+                        <div class="font mb-4">
+                            <p>Are sure to delete selected equipment(s)?</p>
+                        </div>
+                        <div class="modal-footer font">
+                            <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Close</button>
+                            <button class="btns secondary-btn rounded-5 font" type="submit">Delete</button>
                         </div>
                     </form>
                 </div>

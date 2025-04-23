@@ -1,3 +1,6 @@
+const checkboxColumn = document.getElementById("checkboxColumn");
+const user = JSON.parse(localStorage.getItem("activeUser"));
+
 document.addEventListener("DOMContentLoaded", async () => {
 
     function capitalizeWords(str) {
@@ -30,7 +33,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (selectItemIcon) {
         selectItemIcon.addEventListener("click", () => {
             if (!ifSelected) {
-                const checkboxColumn = document.getElementById("checkboxColumn");
                 const checkboxCells = document.querySelectorAll(".checkboxCell input");
                 const rows = document.querySelectorAll("#fighterTableBody tr");
 
@@ -55,7 +57,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (selectAllIcon) {
         selectAllIcon.addEventListener("click", () => {
-            const checkboxColumn = document.getElementById("checkboxColumn");
             const checkboxCells = document.querySelectorAll(".checkboxCell input");
             const rows = document.querySelectorAll("#fighterTableBody tr");
 
@@ -187,6 +188,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if (response.success) {
                     window.electronAPI.showToast(response.message, true);
                     addFirefighterModal.hide()
+                    checkboxColumn.style.display = "none";
                     fetchAndDisplayItems(searchQuery)
 
                     const logData = {
@@ -224,6 +226,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const response = await window.electronAPI.editFirefighter(firefighterData);
                 window.electronAPI.showToast(response.message, response.success);
                 editFirefighterModal.hide();
+                checkboxColumn.style.display = "none";
                 fetchAndDisplayItems(searchQuery);
             })
         }

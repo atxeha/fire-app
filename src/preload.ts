@@ -29,5 +29,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   editFirefighter: (firefighterData: any) => ipcRenderer.invoke("edit-firefighter", firefighterData),
   updateAdminAccount: (data: any) => ipcRenderer.invoke("update-admin-account", data),
   createAccount: (data: any) => ipcRenderer.invoke("create-account", data),
+  deleteReturnEquipment: (deleteId: string) => ipcRenderer.invoke("delete-return-equipment", deleteId),
 });
 

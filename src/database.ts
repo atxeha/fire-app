@@ -262,7 +262,7 @@ export async function pullEquipment(
 
             return {
                 success: true,
-                message: "Item successfully pulled.",
+                message: "Equipment successfully pulled.",
                 item: item,
             };
         });
@@ -305,7 +305,7 @@ export async function returnEquipment(
 
             return {
                 success: true,
-                message: "Item successfully returned.",
+                message: "Equipment successfully returned.",
                 item: updatedItem,
             };
         });

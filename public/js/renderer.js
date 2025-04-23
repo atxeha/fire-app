@@ -322,6 +322,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const address = capitalizeWords(document.getElementById("address").value.trim());
                 const status = document.getElementById("status").value.trim().toUpperCase();
 
+                console.log(employeeId, name, gender, rank, contactNumber, address, status)
+
                 if (!employeeId || !name || !gender || !rank || !contactNumber || !address || !status) {
                     window.electronAPI.showToast("All fields are required.", false);
                     return;

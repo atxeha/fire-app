@@ -136,7 +136,7 @@ ipcMain.handle("pull-equipment", async (event, pullData) => {
     pullData.quantity
   );
   if (item.success) {
-    return { success: true, message: "Item successfully pulled.", item: item };
+    return { success: true, message: "Equipment successfully pulled.", item: item };
   } else {
     console.log(item);
     return { success: false, message: item }; // Return the error message
@@ -153,7 +153,7 @@ ipcMain.handle("return-multiple-equipment", async (event, equipmentLogIds: strin
 
 ipcMain.handle("get-equipment-list", async () => {
   try {
-    return getEquipmentList(); // Fetch and return all items
+    return getEquipmentList();
   } catch (error) {
     console.error("Error fetching equipments:", error);
     return [];
@@ -455,4 +455,15 @@ ipcMain.handle("create-account", async (event, data) => {
     } catch (error) {
         return { success: false, message: `Error: ${error} and ${(error as Error).message}` };
     }
+})
+
+ipcMain.handle("delete-return-equipment", async (event, deleteId) => {
+  try {
+    await prisma.equipmentLog.delete({
+      where: { id: deleteId },
+    })
+    return { success: true, message: "Equipment deleted." }
+  } catch (err) {
+    return { success: false, message: (err as Error).message }
+  }
 })
