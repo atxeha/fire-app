@@ -248,10 +248,12 @@ async function fetchAndDisplayItems(searchQuery = "") {
             return;
         }
 
+        tableHead.style.display = "table-header-group";
+
         filteredItems.forEach((item, index) => {
             const row = document.createElement("tr");
 
-            const formattedDate = new Date(statusFilter === "IN_USE" ? item.createdAt : item.equipment.updatedAt)
+            const formattedDate = new Date(statusFilter === "IN_USE" ? item.createdAt : item.returnedAt)
                 .toLocaleString("en-PH", {
                     timeZone: "Asia/Manila",
                     year: "2-digit",

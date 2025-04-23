@@ -19,9 +19,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let searchQuery = "";
 
+    let isAdmin = !user.isStaff
+
     getFirefighterList()
     fetchAndDisplayItems(searchQuery);
 
+    const updateAccountForm = document.getElementById("updateAccountForm");
     const addItemForm = document.getElementById("addItemForm");
     const addFirefighterForm = document.getElementById("addFirefighterForm")
     const viewPulledItem = document.getElementById("viewPulledItem");
@@ -55,6 +58,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const select = document.getElementById("pullfireFighterId");
 
     const firefighterList = document.getElementById("firefighterList");
+    const addStaffAccountForm = document.getElementById("addStaffAccountForm");
+    const addStaffAccountModal = new bootstrap.Modal(document.getElementById("addStaffAccountModal"));
 
     async function getFirefighterList() {
         const response = await window.electronAPI.getFirefighters();
@@ -573,6 +578,81 @@ document.addEventListener("DOMContentLoaded", async () => {
                     deleteAllLogModal.hide();
                 } else {
                     window.electronAPI.showToast(response.message, false)
+                }
+            })
+        }
+        if (updateAccountForm) {
+            updateAccountForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+        
+                const username = document.getElementById("username").value.trim();
+                const oldPassword = document.getElementById("oldPassword").value.trim();
+                const newPassword = document.getElementById("newPassword").value.trim();
+
+                const addBtn = document.getElementById("addStaffAccount")
+
+                if (addBtn) {
+                    addBtn.addEventListener("click", () => {
+                        updateAccountForm.reset()
+                    })
+                }
+        
+                if (!username || !oldPassword || !newPassword) {
+                    window.electronAPI.showToast("Please fill in all fields.", false);
+                    return;
+                }
+        
+                const response = await window.electronAPI.updateAdminAccount({
+                    username,
+                    oldPassword,
+                    newPassword
+                });
+        
+                window.electronAPI.showToast(response.message, response.success);
+        
+                if (response.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById("updateAccountModal"));
+                    modal.hide();
+                    updateAccountForm.reset();
+                }
+            });
+        }
+        if (addStaffAccountForm) {
+            addStaffAccountForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const name = capitalizeWords(document.getElementById("staffName").value.trim());
+                const username = document.getElementById("staffUsername").value.trim();
+                const isStaff = parseInt(document.getElementById("isStaff").value.trim());
+                const staffPassword = document.getElementById("staffPassword").value.trim();
+                const staffConPassword = document.getElementById("staffConPassword").value.trim();
+
+                if (!name || !username || !staffPassword || !staffConPassword) {
+                    window.electronAPI.showToast("All fields are required.");
+                    return;
+                }
+
+                const data = {
+                    name,
+                    username,
+                    isStaff: Boolean(isStaff),
+                    staffPassword,
+                    staffConPassword,
+                }
+
+                try {
+                    const response = await window.electronAPI.createAccount(data)
+
+                    if (!response.success){
+                        window.electronAPI.showToast(response.message, response.success);
+                        return;
+                    }
+
+                    window.electronAPI.showToast(response.message, response.success);
+                    addStaffAccountModal.hide();
+                    fetchAndDisplayItems(searchQuery)
+                } catch (err) {
+
                 }
             })
         }

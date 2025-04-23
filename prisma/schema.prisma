@@ -19,7 +19,7 @@ model User {
   name       String
   password   String
   isStaff    Boolean
-  isActive   Boolean
+  isActive   Boolean  @default(true)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -29,7 +29,7 @@ model User {
 
 model Firefighter {
   id            String            @id @default(cuid())
-  employeeId    BigInt @unique
+  employeeId    BigInt            @unique
   name          String
   gender        String
   rank          String
@@ -76,14 +76,14 @@ enum EquipmentStatus {
 }
 
 model EquipmentLog {
-  id            String   @id @default(cuid())
+  id            String             @id @default(cuid())
   equipmentId   String
   fireFighterId String
   releasedBy    String
   quantity      Int
   status        EquipmentLogStatus @default(IN_USE)
-  returnedAt     DateTime?
-  createdAt     DateTime @default(now())
+  returnedAt    DateTime?
+  createdAt     DateTime           @default(now())
 
   equipment   Equipment   @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
   fireFighter Firefighter @relation(fields: [fireFighterId], references: [id], onDelete: Cascade)

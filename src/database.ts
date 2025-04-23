@@ -417,6 +417,48 @@ export async function autoAccountCreate() {
   }
 }
 
+export async function createAccount(
+    name: string,
+    username: string,
+    isStaff: boolean,
+    password: string,
+    conPassword: string) {
+    try {
+        const userExist = await prisma.user.findUnique({
+            where: { username },
+        })
+
+        if (userExist) {
+            throw new Error(
+                `'${username}' already exists.`
+              );
+        }
+
+        if (password !== conPassword) {
+            console.log(password, conPassword)
+            throw new Error(
+                `Passwords don't match.`
+              );
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await prisma.user.create({
+            data: {
+              username,
+              name,
+              password: hashedPassword,
+              isStaff: isStaff,
+            },
+        });
+
+        return { success: true, message: "Account successfully created." };
+
+    } catch (err) {
+        return { success: false, message: (err as Error).message }
+    }
+}
+
 export async function checkLogin(username: string, password: string) {
   try {
     // Find user by username

@@ -235,6 +235,8 @@ async function fetchAndDisplayItems(searchQuery = "") {
             return;
         }
 
+        tableHead.style.display = "table-header-group";
+
         filteredItems.forEach((item, index) => {
 
             function itemStatus(status) {

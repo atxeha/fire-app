@@ -12,3 +12,17 @@
 .toggle-password:hover {
     color: #b9a4a4;
 }
+
+.toggle-passwords {
+    position: absolute;
+    right: 34px;
+    top: 226px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #d1bebe;
+    font-size: 1.2rem ;
+    transition: all 0.1s ease-in-out;
+}
+.toggle-passwords:hover {
+    color: #b9a4a4;
+}

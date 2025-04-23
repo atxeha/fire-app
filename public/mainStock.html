@@ -53,7 +53,7 @@
                             data-bs-toggle="tooltip"
                             data-bs-custom-class="custom-tooltip"
                             title="Update account"
-                            id="updateAccount">settings</i>
+                            id="updateAccount">manage_accounts</i>
                     </span>
                 </div>
                 <div>
@@ -540,12 +540,25 @@
             </div>
         </div>
     </div>
-    <!-- Update Admin Account Modal -->
+    <!-- Change Password Modal -->
     <div class="modal" id="updateAccountModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="1" aria-labelledby="updateAccountModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header d-flex justify-content-between">
                     <h6 class="modal-title" id="updateAccountModalLabel">Change Password</h6>
+                    <div class="d-flex gap-3 me-4">
+                        <div>
+                            <span data-bs-toggle="modal" data-bs-target="#addStaffAccountModal">
+                                <i class="material-icons icon icon-btn"
+                                    style="cursor: pointer; padding-left: 2px;"
+                                    data-bs-placement="top"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-custom-class="custom-tooltip"
+                                    title="Add staff account"
+                                    id="addStaffAccount">group_add</i>
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <form method="post" id="updateAccountForm">
                     <div class="modal-body font p-4 pb-2">
@@ -568,23 +581,75 @@
                         </div>
             
                         <div class="modal-footer font d-flex justify-content-end">
-                                <div>
-                                    <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Discard</button>
-                                    <button class="btns secondary-btn rounded-5 font" type="submit">Save</button>
-
-                                </div>
+                            <div>
+                                <button type="button" class="btn btn-link font p-0 me-3" data-bs-dismiss="modal">Discard</button>
+                                <button class="btns secondary-btn rounded-5 font" type="submit">Save</button>
+                            </div>
                         </div>
                     </div>
                 </form>
                 </div>
             </div>
         </div>
-     </div>
+    </div>
+    <!-- Add Staff Account Modal -->
+    <div class="modal" id="addStaffAccountModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="1" aria-labelledby="addStaffAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="addStaffAccountModalLabel">Add New Account</h6>
+                </div>
+                <form method="post" id="addStaffAccountForm">
+                    <div class="modal-body font p-4 pb-2">
+                        <div class="row font mb-4">
+                            <div class="input-field col-7">
+                                <label class="mb-2 ms-2" for="staffName">Name <span class="text-muted" style="font-size: 0.8rem;">(First Middle Last)</span></label>
+                                <input type="text" id="staffName" class="search-box form-control rounded-5 font">
+                            </div>
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="staffUsername">Username</label>
+                                <input type="text" id="staffUsername" class="search-box form-control rounded-5 font">
+                            </div>
+                        </div>
+                        <div class="row font mb-4">
+                            <div class="input-field col-5">
+                                <label class="mb-2 ms-2" for="isStaff">Role</label>
+                                <select id="isStaff" class="search-box form-select form-control rounded-5 font">
+                                    <option value="1">STAFF</option>
+                                    <option value="">ADMIN</option>
+                                </select>
+                            </div>
+                            <div class="input-field col-7">
+                                <label class="mb-2 ms-2" for="staffPassword">Password</label>
+                                <input type="password" id="staffPassword" class="search-box form-control rounded-5 font">
+                                <i class="material-icons toggle-password mt-2 pt-3" id="toggleIcons">visibility_off</i>
+                            </div>
+                        </div>
+                        <div class="row font mb-4 d-flex justify-content-end">
+                            <div class="input-field col-7">
+                                <label class="mb-2 ms-2" for="staffConPassword">Confirm Password</label>
+                                <input type="password" id="staffConPassword" class="search-box form-control rounded-5 font">
+                                <i class="material-icons toggle-passwords mt-2 pt-3" id="toggleIconss">visibility_off</i>
+                            </div>
+                        </div>
+                        <div class="modal-footer font d-flex justify-content-end">
+                            <div>
+                                <button type="button" class="btn btn-link font p-0 me-3" data-bs-toggle="modal" data-bs-target="#updateAccountModal">Back</button>
+                                <button class="btns secondary-btn rounded-5 font" type="submit">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="./js/renderer.js"></script>
     <script src="./js/getLog.js"></script>
     <script src="./js/utils/defaultDate.js"></script>
     <script src="./js/utils/toast.js"></script>
     <script src="./js/utils/pass.js"></script>
+    <script src="./js/utils/newPass.js"></script>
     <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../node_modules/toastify-js/src/toastify.js"></script>
 </body>

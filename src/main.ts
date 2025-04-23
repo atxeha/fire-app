@@ -15,10 +15,12 @@ import {
   editEquipment,
   getEquipmentLog,
   returnEquipment,
-  returnMultipleEquipments
+  returnMultipleEquipments,
+  createAccount
 } from "./database";
 import { execSync } from "child_process";
 import * as XLSX from "xlsx";
+import bcrypt from 'bcrypt';
 
 const isDev = !app.isPackaged;
 
@@ -407,3 +409,50 @@ ipcMain.handle("edit-firefighter", async (_event, firefighterData) => {
       return { success: false, message: (error as Error).message };
   }
 });
+
+ipcMain.handle("update-admin-account", async (_event, data) => {
+    const { username, oldPassword, newPassword } = data;
+
+    try {
+        const user = await prisma.user.findUnique({ where: { username } });
+
+        if (!user) {
+            return { success: false, message: "Invalid username or password." };
+        }
+
+        // Compare entered oldPassword with stored hash
+        const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+
+        if (!isPasswordMatch) {
+            return { success: false, message: "Invalid username or password." };
+        }
+
+        // Hash the new password before saving
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        await prisma.user.update({
+            where: { username },
+            data: { password: hashedNewPassword },
+        });
+
+        return { success: true, message: "Password updated successfully." };
+    } catch (err) {
+        console.error(err);
+        return { success: false, message: "Error updating password." };
+    }
+});
+
+ipcMain.handle("create-account", async (event, data) => {
+    try {
+        return await createAccount(
+            data.name,
+            data.username,
+            data.isStaff,
+            data.staffPassword,
+            data.staffConPassword,
+        );
+
+    } catch (error) {
+        return { success: false, message: `Error: ${error} and ${(error as Error).message}` };
+    }
+})
