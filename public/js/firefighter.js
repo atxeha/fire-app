@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const deleteSelectedBtn = document.getElementById("deleteSelected");
     const editFirefighterForm = document.getElementById("editFirefighterForm");
     const editFirefighterModal = new bootstrap.Modal(document.getElementById("editFirefighterModal"));
+    const addFirefighterForm = document.getElementById("addFirefighterForm");
+    const addFirefighterModal = new bootstrap.Modal(document.getElementById("addFirefighterModal"));
 
     let ifSelected = false;
 
@@ -150,6 +152,57 @@ document.addEventListener("DOMContentLoaded", async () => {
                 fetchAndDisplayItems(searchQuery);
                 deleteItemModal.hide();
             });
+        }
+        
+        if (addFirefighterForm) {
+            addFirefighterForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const employeeId = parseInt(document.getElementById("employeeId").value.trim() || "0", 10);
+                const name = capitalizeWords(document.getElementById("name").value.trim());
+                const gender = document.getElementById("gender").value.trim().toUpperCase();
+                const rank = document.getElementById("rank").value.trim().toUpperCase();
+                const contactNumber = parseInt(document.getElementById("contactNumber").value.trim() || "0", 10);
+                const email = document.getElementById("email").value.trim();
+                const address = capitalizeWords(document.getElementById("address").value.trim());
+                const status = document.getElementById("status").value.trim().toUpperCase();
+
+                if (!employeeId || !name || !gender || !rank || !contactNumber || !address || !status) {
+                    window.electronAPI.showToast("All fields are required.", false);
+                    return;
+                }
+
+                const data = {
+                    employeeId,
+                    name,
+                    gender,
+                    rank,
+                    contactNumber,
+                    email,
+                    address,
+                    status
+                }
+
+                const response = await window.electronAPI.addFirefighter(data);
+                if (response.success) {
+                    window.electronAPI.showToast(response.message, true);
+                    addFirefighterModal.hide()
+                    fetchAndDisplayItems(searchQuery)
+
+                    const logData = {
+                        userId: user.id,
+                        log: `Added new firefighter: (${response.newFirefighter.rank}. ${response.newFirefighter.name}).`
+                    }
+
+                    try {
+                        window.electronAPI.addLog(logData);
+                    } catch (error) {
+                        console.log(error)
+                    }
+                } else {
+                    window.electronAPI.showToast(response.message, false);
+                }
+            })
         }
 
         if (editFirefighterForm) {

@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const addItemDates = document.getElementById("addDates");
+    const addItemDate = document.getElementById("addDate");
   
     if (addItemDates) {
       const now = new Date();
@@ -11,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const formattedDateTime = now.toISOString().slice(0, 16);
   
       addItemDates.value = formattedDateTime;
+      addItemDate.value = formattedDateTime;
     }
   });
   
