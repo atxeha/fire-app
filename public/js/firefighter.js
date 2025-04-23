@@ -210,7 +210,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 e.preventDefault();
 
                 const firefighterData = {
-                    id: parseInt(document.getElementById("firefighterId").value.trim() || "0", 10),
+                    id: document.getElementById("firefighterId").value.trim(),
                     employeeId: document.getElementById("editEmployeeId").value.trim(),
                     name: capitalizeWords(document.getElementById("editName").value.trim()),
                     gender: document.getElementById("editGender").value.trim(),
@@ -220,7 +220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     address: capitalizeWords(document.getElementById("editAddress").value.trim()),
                     status: document.getElementById("editStatus").value.trim()
                 };
-            
+
                 const response = await window.electronAPI.editFirefighter(firefighterData);
                 window.electronAPI.showToast(response.message, response.success);
                 editFirefighterModal.hide();
